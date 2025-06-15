@@ -12,28 +12,46 @@ This document provides a **complete index** of all context files and documentati
   - Current status and capabilities
   - Quick start instructions
 
-### 📊 Frontend Documentation (`kkcg_app/`)
-- **`kkcg_app/CONTEXT.md`** - Streamlit dashboard application
-  - UI design system and components
-  - Page structure and navigation
-  - Dark theme implementation
-  - User experience features
+### 📊 Frontend Documentation
+- **`pages/CONTEXT.md`** - **NEW** - Streamlit pages documentation
+  - Forecasting Tool and Heatmap Comparison pages
+  - UI/UX design standards and theme optimization
+  - Backend integration and data flow
+  - Development guidelines and performance optimization
 
-- **`kkcg_app/utils/CONTEXT.md`** - Dashboard utility modules
-  - Data simulation and generation
-  - Visualization and charting utilities
-  - Business intelligence engine
-  - Performance optimization
+- **`.streamlit/CONTEXT.md`** - **NEW** - Streamlit configuration documentation
+  - Theme settings and KKCG branding
+  - Server configuration and deployment settings
+  - Security and performance optimization
+  - Integration with Railway backend
 
-### 🔮 Backend Documentation (`FORECASTER/`)
-- **`FORECASTER/CONTEXT.md`** - FastAPI backend system overview
-  - ML capabilities and algorithms
+- **`utils/CONTEXT.md`** - Core utilities documentation
+  - API client for Railway backend integration
+  - Forecasting algorithms and heatmap visualization
+  - Business intelligence and insights generation
+  - Error handling and performance optimization
+
+### 🔮 Backend Documentation
+- **`backend/CONTEXT.md`** - **NEW** - Local development backend
+  - FastAPI application for local development
+  - PostgreSQL and SQLite database support
+  - JWT authentication and Docker setup
+  - Local development workflow and testing
+
+- **`backend_final/CONTEXT.md`** - **NEW** - Production backend deployment
+  - Railway platform deployment configuration
+  - Production-grade PostgreSQL integration
+  - Performance monitoring and security features
+  - Production deployment workflow
+
+- **`FORECASTER/CONTEXT.md`** - Legacy FastAPI backend system overview
+  - ML capabilities and algorithms (legacy system)
   - API endpoints and data models
   - Technical implementation details
   - Performance characteristics
 
-- **`FORECASTER/backend/CONTEXT.md`** - FastAPI application details
-  - Application structure and architecture
+- **`FORECASTER/backend/CONTEXT.md`** - Legacy FastAPI application details
+  - Application structure and architecture (legacy)
   - API routes and business logic
   - Configuration and deployment
   - Security and performance features
@@ -49,19 +67,21 @@ This document provides a **complete index** of all context files and documentati
 
 ### For Developers
 1. **Start Here**: `PROJECT_CONTEXT.md` - Overall system understanding
-2. **Frontend Work**: `kkcg_app/CONTEXT.md` - Dashboard development
-3. **Backend Work**: `FORECASTER/backend/CONTEXT.md` - API development
-4. **Utilities**: `kkcg_app/utils/CONTEXT.md` - Helper functions
+2. **Frontend Work**: `pages/CONTEXT.md` - Streamlit pages development
+3. **Backend Work**: `backend/CONTEXT.md` - Local API development
+4. **Production Backend**: `backend_final/CONTEXT.md` - Railway deployment
+5. **Utilities**: `utils/CONTEXT.md` - Helper functions and API integration
 
 ### For System Administrators
 1. **Deployment**: `SYSTEM_MANAGEMENT_CONTEXT.md` - System setup
-2. **Backend Config**: `FORECASTER/backend/CONTEXT.md` - API configuration
-3. **Monitoring**: `FORECASTER/CONTEXT.md` - Performance metrics
+2. **Production Config**: `backend_final/CONTEXT.md` - Railway configuration
+3. **Streamlit Config**: `.streamlit/CONTEXT.md` - Frontend configuration
+4. **Monitoring**: Railway platform and health endpoints
 
 ### For Business Users
 1. **System Overview**: `PROJECT_CONTEXT.md` - Business value and features
-2. **User Interface**: `kkcg_app/CONTEXT.md` - Dashboard capabilities
-3. **Analytics Features**: `kkcg_app/utils/CONTEXT.md` - Business intelligence
+2. **User Interface**: `pages/CONTEXT.md` - Dashboard capabilities
+3. **Analytics Features**: `utils/CONTEXT.md` - Business intelligence and forecasting
 
 ## 🎯 Context File Standards
 
@@ -124,14 +144,20 @@ KKCG TOOLS/
 ├── PROJECT_CONTEXT.md                    # Main project overview
 ├── DOCUMENTATION_INDEX.md               # This file - documentation index
 ├── SYSTEM_MANAGEMENT_CONTEXT.md         # Batch files and system management
-├── kkcg_app/
-│   ├── CONTEXT.md                       # Streamlit dashboard
-│   └── utils/
-│       └── CONTEXT.md                   # Dashboard utilities
-└── FORECASTER/
-    ├── CONTEXT.md                       # Backend system overview
+├── pages/
+│   └── CONTEXT.md                       # NEW - Streamlit pages documentation
+├── utils/
+│   └── CONTEXT.md                       # Core utilities and API integration
+├── backend/
+│   └── CONTEXT.md                       # NEW - Local development backend
+├── backend_final/
+│   └── CONTEXT.md                       # NEW - Production backend deployment
+├── .streamlit/
+│   └── CONTEXT.md                       # NEW - Streamlit configuration
+└── FORECASTER/                          # Legacy backend system
+    ├── CONTEXT.md                       # Legacy backend overview
     └── backend/
-        └── CONTEXT.md                   # FastAPI application
+        └── CONTEXT.md                   # Legacy FastAPI application
 ```
 
 ## 🎯 Next Steps
