@@ -7,9 +7,8 @@ from sqlalchemy.orm import sessionmaker, Session, relationship
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import List, Optional
-import pandas as pd
-import numpy as np
 import os
+import random
 from dotenv import load_dotenv
 import jwt
 import hashlib
@@ -532,15 +531,15 @@ async def seed_database(db: Session = Depends(get_db)):
         for outlet in outlets:
             for dish in dishes:
                 # Generate realistic demand based on dish popularity
-                base_demand = np.random.randint(50, 200)
+                base_demand = random.randint(50, 200)
                 if dish.name in ["Chicken Biryani", "Masala Dosa", "Hyderabadi Biryani"]:
-                    base_demand = np.random.randint(100, 300)
+                    base_demand = random.randint(100, 300)
                 elif dish.name in ["Filter Coffee", "Coconut Chutney"]:
-                    base_demand = np.random.randint(20, 80)
+                    base_demand = random.randint(20, 80)
                 
                 # Add some randomness
-                predicted_demand = int(base_demand * np.random.uniform(0.8, 1.2))
-                weather_factor = np.random.uniform(0.9, 1.1)
+                predicted_demand = int(base_demand * random.uniform(0.8, 1.2))
+                weather_factor = random.uniform(0.9, 1.1)
                 
                 db_demand = DemandData(
                     outlet_id=outlet.id,
