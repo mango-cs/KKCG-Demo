@@ -13,7 +13,6 @@ import os
 from dotenv import load_dotenv
 import jwt
 import hashlib
-from passlib.context import CryptContext
 
 # Load environment variables
 load_dotenv()
@@ -193,15 +192,12 @@ def get_db():
     finally:
         db.close()
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Utility functions
+# Utility functions  
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def verify_password(password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(password, hashed_password)
+    return hash_password(password) == hashed_password
 
 def create_access_token(data: dict):
     to_encode = data.copy()
