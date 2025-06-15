@@ -1,42 +1,51 @@
 import streamlit as st
+import pandas as pd
 import plotly.graph_objects as go
-from datetime import datetime
+import plotly.express as px
+from datetime import datetime, timedelta
+import sys
+import os
+
+# Add utils directory to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
+
+# Import utilities
+from utils.api_client import (
+    get_api_client, 
+    show_backend_status, 
+    show_login_form, 
+    check_authentication,
+    logout
+)
 
 # Page configuration
 st.set_page_config(
-    page_title="🍛 KKCG Analytics Dashboard",
+    page_title="KKCG Analytics Dashboard",
     page_icon="🍛",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS for neumorphism design
+# Custom CSS with enhanced styling
 st.markdown("""
 <style>
-    /* Main container styling */
-    .main-container {
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+    
+    /* Main styling */
+    .main-header {
+        text-align: center;
+        padding: 3rem 0;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
         border-radius: 20px;
         margin-bottom: 2rem;
         box-shadow: 
-            20px 20px 60px #bebebe,
-            -20px -20px 60px #ffffff;
-    }
-    
-    /* Hero section */
-    .hero-section {
-        text-align: center;
-        padding: 3rem 0;
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        border-radius: 20px;
-        margin-bottom: 3rem;
-        box-shadow: 
             inset 5px 5px 10px rgba(0,0,0,0.2),
-            inset -5px -5px 10px rgba(255,255,255,0.1);
+            inset -5px -5px 10px rgba(255,255,255,0.1),
+            0 8px 32px rgba(0,0,0,0.1);
     }
     
-    .hero-title {
+    .main-title {
         font-size: 3.5rem;
         font-weight: 700;
         color: #FF6B35;
@@ -45,354 +54,394 @@ st.markdown("""
         font-family: 'Poppins', sans-serif;
     }
     
-    .hero-subtitle {
-        font-size: 1.5rem;
+    .main-subtitle {
+        font-size: 1.3rem;
         color: #E8F4FD;
-        margin-bottom: 2rem;
+        font-weight: 300;
         font-family: 'Inter', sans-serif;
+        margin-bottom: 1rem;
     }
     
-    /* Navigation cards */
-    .nav-card {
-        background: #2a2a3e;
+    .feature-card {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
         border-radius: 20px;
         padding: 2rem;
         margin: 1rem 0;
         border: 1px solid rgba(255,255,255,0.1);
         transition: all 0.3s ease;
-        cursor: pointer;
-        text-decoration: none;
-        display: block;
+        height: 100%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(255,107,53,0.2);
+        border: 1px solid rgba(255,107,53,0.3);
+    }
+    
+    .metric-card {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.3s ease;
         height: 100%;
     }
     
-    .nav-card:hover {
-        background: #3a3a4e;
-        border: 1px solid rgba(255,107,53,0.3);
-        transform: translateY(-5px);
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255,107,53,0.2);
     }
     
-    .nav-card-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    
-    .nav-card-icon {
-        font-size: 3rem;
-        margin-right: 1rem;
-        color: #FF6B35;
-    }
-    
-    .nav-card-title {
-        font-size: 1.8rem;
-        font-weight: 600;
-        color: #E8F4FD;
-        margin: 0;
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    .nav-card-description {
-        color: #E8F4FD;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin-bottom: 1rem;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .nav-card-features {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .nav-card-features li {
-        padding: 0.3rem 0;
-        color: #BDC3C7;
-        font-size: 0.95rem;
-    }
-    
-    .nav-card-features li:before {
-        content: "✅ ";
-        margin-right: 0.5rem;
-    }
-    
-    /* Benefits section */
-    .benefits-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin: 3rem 0;
-    }
-    
-    .benefit-card {
-        background: #2a2a3e;
-        border-radius: 15px;
-        padding: 1.5rem;
-        border: 1px solid rgba(255,255,255,0.1);
-        text-align: center;
-        transition: all 0.3s ease;
-    }
-    
-    .benefit-card:hover {
-        background: #3a3a4e;
-        border: 1px solid rgba(255,107,53,0.2);
-    }
-    
-    .benefit-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        color: #FF6B35;
-    }
-    
-    .benefit-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #E8F4FD;
-        margin-bottom: 0.5rem;
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    .benefit-text {
-        color: #E8F4FD;
-        font-size: 1rem;
-        line-height: 1.5;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Stats section */
-    .stats-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin: 2rem 0;
-    }
-    
-    .stat-card {
-        background: #2a2a3e;
-        border-radius: 15px;
-        padding: 1.5rem;
-        text-align: center;
-        border: 1px solid rgba(255,255,255,0.1);
-        transition: all 0.3s ease;
-    }
-    
-    .stat-card:hover {
-        background: #3a3a4e;
-        border: 1px solid rgba(255,107,53,0.2);
-    }
-    
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #FF6B35;
-        margin-bottom: 0.5rem;
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    .stat-label {
-        color: #E8F4FD;
-        font-size: 1rem;
-        font-weight: 500;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* CTA section */
-    .cta-button {
-        background: linear-gradient(145deg, #FF6B35, #FF8C42);
+    .tool-button {
+        background: linear-gradient(145deg, #FF6B35, #ff8660);
         color: white;
         border: none;
-        border-radius: 50px;
+        border-radius: 15px;
         padding: 1rem 2rem;
         font-size: 1.1rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 
-            10px 10px 20px rgba(255,107,53,0.3),
-            -10px -10px 20px rgba(255,255,255,0.1);
+        width: 100%;
+        margin: 0.5rem 0;
     }
     
-    .cta-button:hover {
-        transform: translateY(-5px);
-        box-shadow: 
-            15px 15px 30px rgba(255,107,53,0.4),
-            -15px -15px 30px rgba(255,255,255,0.2);
-    }
-    
-    /* Footer */
-    .footer {
-        text-align: center;
-        padding: 2rem 0;
-        color: #7F8C8D;
-        font-size: 0.9rem;
-        border-top: 1px solid #E8E8E8;
-        margin-top: 3rem;
+    .tool-button:hover {
+        background: linear-gradient(145deg, #ff8660, #FF6B35);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255,107,53,0.3);
     }
     
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
-    .stDeployButton {display:none;}
+    .stDeployButton {display: none;}
     footer {visibility: hidden;}
     .stApp > header {visibility: hidden;}
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .main-title { font-size: 2.5rem; }
+        .main-subtitle { font-size: 1.1rem; }
+        .feature-card { padding: 1.5rem; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
-def main():
-    # Simple direct navigation - no session state needed
+@st.cache_data
+def load_dashboard_data():
+    """Load dashboard data from backend API ONLY"""
+    client = get_api_client()
     
-    # Hero Section
-    st.markdown("""
-    <div class="hero-section">
-        <h1 class="hero-title">🍛 Kodi Kura Chitti Gaare</h1>
-        <p class="hero-subtitle">AI-Powered Analytics Dashboard for South Indian Restaurant Chain</p>
-        <p style="color: #BDC3C7; font-size: 1.1rem;">Unlock the power of data-driven decision making with our comprehensive analytics platform</p>
-    </div>
-    """, unsafe_allow_html=True)
+    try:
+        # Get demand data from backend
+        df = client.get_demand_data()
+        
+        if df.empty:
+            st.warning("⚠️ **No data available**: Backend returned empty dataset")
+            st.info("💡 **Tip**: Try seeding the database with sample data using the 'Seed Database' button below")
+            return pd.DataFrame()
+        
+        return df
+        
+    except Exception as e:
+        st.error(f"❌ **Data Loading Error**: {str(e)}")
+        st.stop()
+
+def create_summary_metrics(df):
+    """Create beautiful summary metrics"""
+    if df.empty:
+        st.info("📊 **No metrics available**: Please seed the database or check data source")
+        return
     
-    # Welcome message
-    st.markdown("""
-    <div style="text-align: center; margin: 2rem 0;">
-        <h2 style="color: #E8F4FD; font-family: 'Poppins', sans-serif;">AI-Powered Restaurant Analytics</h2>
-        <p style="color: #BDC3C7; font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.5;">
-            Predict demand, optimize operations, and make data-driven decisions for your restaurant chain.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns(4)
     
-    # Deployment info for Community Cloud
-    st.info("🚀 **Deployed on Streamlit Community Cloud** - This is a demo version showcasing AI-powered restaurant analytics capabilities.")
-    
-    # Debug section - Remove this after testing
-    if st.button("🔄 Clear Cache & Reload", key="debug_clear"):
-        st.cache_data.clear()
-        st.cache_resource.clear()
-        st.rerun()
-    
-    # Navigation Cards Section
-    st.markdown("""
-    <div style="margin: 4rem 0;">
-        <h2 style='text-align: center; color: #E8F4FD; margin-bottom: 3rem; font-family: "Poppins", sans-serif; font-size: 2rem;'>🚀 Choose Your Analytics Tool</h2>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Perfectly centered columns with equal spacing
-    col1, col2 = st.columns(2, gap="large")
+    total_demand = df['predicted_demand'].sum()
+    avg_demand = df['predicted_demand'].mean()
+    peak_demand = df['predicted_demand'].max()
+    unique_dishes = df['dish'].nunique() if 'dish' in df.columns else 0
     
     with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3 style="color: #FF6B35; margin: 0;">📊 Total Demand</h3>
+            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{total_demand:,}</h2>
+            <p style="color: #A0A0A0; margin: 0;">Units across all outlets</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3 style="color: #FF6B35; margin: 0;">📈 Avg Daily</h3>
+            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{avg_demand:.0f}</h2>
+            <p style="color: #A0A0A0; margin: 0;">Average per dish/day</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3 style="color: #FF6B35; margin: 0;">🔥 Peak Demand</h3>
+            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{peak_demand:,}</h2>
+            <p style="color: #A0A0A0; margin: 0;">Highest single demand</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3 style="color: #FF6B35; margin: 0;">🍽️ Menu Items</h3>
+            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{unique_dishes}</h2>
+            <p style="color: #A0A0A0; margin: 0;">Active dishes</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+def create_demand_chart(df):
+    """Create interactive demand visualization"""
+    if df.empty:
+        st.info("📈 **No chart data available**: Please seed the database to see demand trends")
+        return
+    
+    # Aggregate data by date
+    if 'date' in df.columns:
+        daily_demand = df.groupby('date')['predicted_demand'].sum().reset_index()
+        
+        fig = px.line(
+            daily_demand, 
+            x='date', 
+            y='predicted_demand',
+            title="📈 Daily Demand Trends (Live Backend Data)",
+            labels={'predicted_demand': 'Total Demand', 'date': 'Date'}
+        )
+        
+        fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='white',
+            title_font_size=20,
+            title_font_color='#FF6B35'
+        )
+        
+        fig.update_traces(line_color='#FF6B35', line_width=3)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("📅 **Date data not available**: Chart requires date column in backend data")
+
+def main():
+    """Enhanced main dashboard with backend-only integration"""
+    
+    # Header with backend status
+    st.markdown("""
+    <div class="main-header">
+        <h1 class="main-title">🍛 KKCG Analytics Dashboard</h1>
+        <p class="main-subtitle">AI-Powered Restaurant Analytics for Kodi Kura Chitti Gaare</p>
+        <p style="color: #BDC3C7; font-size: 1rem; margin-top: 1rem;">Live Backend Integration • Real-time Data • Professional Analytics</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Backend status and authentication section
+    st.markdown("---")
+    
+    # Backend connection status
+    show_backend_status()
+    
+    # Authentication section
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        if check_authentication():
+            st.success(f"👤 **Logged in as:** {st.session_state.get('username', 'User')}")
+            if st.button("🚪 Logout", use_container_width=True):
+                logout()
+        else:
+            show_login_form()
+    
+    st.markdown("---")
+    
+    # Load and display data
+    with st.spinner("🔄 Loading live data from backend..."):
+        df = load_dashboard_data()
+    
+    if not df.empty:
+        # Summary metrics
+        st.markdown("### 📊 Live Performance Indicators")
+        create_summary_metrics(df)
+        
+        st.markdown("---")
+        
+        # Demand visualization
+        st.markdown("### 📈 Real-time Demand Analytics")
+        create_demand_chart(df)
+        
+        st.markdown("---")
+    else:
+        # Show help when no data
+        st.markdown("### 🎯 **Getting Started**")
+        st.info("""
+        **Welcome to KKCG Analytics Dashboard!**
+        
+        Your backend is connected but no data is available yet. Here's how to get started:
+        
+        1. **Seed Database**: Click the 'Seed Database' button below to populate with sample data
+        2. **Explore Tools**: Use the analytics tools even with empty data to see the interface
+        3. **Add Real Data**: Use the API endpoints to add your restaurant's actual data
+        """)
+    
+    # Enhanced Analytics Tools Section
+    st.markdown("### 🚀 Professional Analytics Tools")
+    
+    tool_col1, tool_col2 = st.columns(2)
+    
+    with tool_col1:
         st.markdown("""
-        <div class="nav-card">
-            <div class="nav-card-header">
-                <div class="nav-card-icon">🔮</div>
-                <h3 class="nav-card-title">Demand Forecasting</h3>
+        <div class="feature-card">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                <h3 style="color: #FF6B35; margin: 0;">AI Demand Forecasting</h3>
             </div>
-            <p class="nav-card-description">
-                Predict future demand using AI algorithms with weather and event factors.
+            <p style="color: #E8F4FD; line-height: 1.6; margin-bottom: 1.5rem;">
+                Advanced machine learning forecasting engine with real backend data. 
+                Features seasonal analysis, confidence intervals, and AI-powered insights.
             </p>
-            <ul class="nav-card-features">
-                <li>7-day demand forecasting</li>
-                <li>Weather & event analysis</li>
-                <li>Interactive visualizations</li>
-                <li>Export capabilities</li>
-            </ul>
+            <div style="margin-bottom: 1rem;">
+                <span style="background: #FF6B35; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🔗 Live Backend</span>
+                <span style="background: #4CAF50; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🔮 ML Powered</span>
+                <span style="background: #2196F3; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem;">📈 Real-time</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
-        if st.button("🔮 Launch Forecasting Tool", key="forecast_btn", use_container_width=True):
+        if st.button("🚀 Launch Forecasting Tool", use_container_width=True, type="primary"):
             st.switch_page("pages/Forecasting_Tool.py")
+    
+    with tool_col2:
+        st.markdown("""
+        <div class="feature-card">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🔥</div>
+                <h3 style="color: #FF6B35; margin: 0;">Interactive Heatmap Analytics</h3>
+            </div>
+            <p style="color: #E8F4FD; line-height: 1.6; margin-bottom: 1.5rem;">
+                Dynamic heatmap visualization with live backend data integration. 
+                Real-time performance analysis across dishes and outlets with AI insights.
+            </p>
+            <div style="margin-bottom: 1rem;">
+                <span style="background: #FF6B35; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🎨 Interactive</span>
+                <span style="background: #9C27B0; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🔍 Live Data</span>
+                <span style="background: #FF9800; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem;">💡 AI Insights</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("🔥 Launch Heatmap Analytics", use_container_width=True, type="primary"):
+            st.switch_page("pages/Heatmap_Comparison.py")
+    
+    st.markdown("---")
+    
+    # Platform Features section
+    st.markdown("### ✨ Live Backend Features")
+    
+    feature_col1, feature_col2, feature_col3 = st.columns(3)
+    
+    with feature_col1:
+        st.markdown("""
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(145deg, #2a2a3e, #3a3a4e); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔗</div>
+            <h4 style="color: #FF6B35; margin-bottom: 1rem;">Live API Integration</h4>
+            <p style="color: #E8F4FD; line-height: 1.5;">Direct connection to Railway-hosted backend with PostgreSQL database and real-time data synchronization.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with feature_col2:
+        st.markdown("""
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(145deg, #2a2a3e, #3a3a4e); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔐</div>
+            <h4 style="color: #FF6B35; margin-bottom: 1rem;">JWT Authentication</h4>
+            <p style="color: #E8F4FD; line-height: 1.5;">Secure user authentication with token-based access control and user management system.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with feature_col3:
+        st.markdown("""
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(145deg, #2a2a3e, #3a3a4e); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚡</div>
+            <h4 style="color: #FF6B35; margin-bottom: 1rem;">Production Ready</h4>
+            <p style="color: #E8F4FD; line-height: 1.5;">Enterprise-grade backend infrastructure with automatic scaling and professional deployment.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Backend management section
+    st.markdown("---")
+    st.markdown("### 🔧 Backend Management")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🌱 Seed Database", help="Add sample data to the backend database"):
+            client = get_api_client()
+            with st.spinner("Seeding database with sample data..."):
+                result = client.seed_database()
+            if result["success"]:
+                st.success(f"✅ {result['message']}")
+                st.cache_data.clear()  # Clear cache to reload data
+            else:
+                st.error(f"❌ {result['error']}")
+    
+    with col2:
+        if st.button("📊 View API Documentation", help="Open live API documentation"):
+            client = get_api_client()
+            st.success(f"**API Documentation**: [Open Live Docs]({client.base_url}/docs)")
+    
+    with col3:
+        if st.button("🔄 Refresh Data", help="Clear cache and reload from backend"):
+            st.cache_data.clear()
+            st.success("✅ Data cache cleared! Reloading from backend...")
+            st.rerun()
+    
+    # Backend API Information
+    st.markdown("---")
+    st.markdown("### 🌐 API Endpoints")
+    
+    client = get_api_client()
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        **🔗 Backend URL**: `{client.base_url}`
+        
+        **📋 Available Endpoints**:
+        - `GET /health` - Backend health check
+        - `POST /auth/login` - User authentication  
+        - `POST /auth/register` - User registration
+        - `GET /outlets` - Restaurant outlets
+        - `GET /dishes` - Menu items
+        - `GET /demand-data` - Historical demand data
+        - `POST /seed-data` - Populate sample data
+        """)
     
     with col2:
         st.markdown("""
-        <div class="nav-card">
-            <div class="nav-card-header">
-                <div class="nav-card-icon">🔥</div>
-                <h3 class="nav-card-title">Demand Heatmap & Analytics</h3>
-            </div>
-            <p class="nav-card-description">
-                Visualize demand patterns and compare performance across dishes and outlets.
-            </p>
-            <ul class="nav-card-features">
-                <li>Interactive heatmaps</li>
-                <li>Performance comparisons</li>
-                <li>AI business insights</li>
-                <li>Professional reports</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        if st.button("🔥 Launch Heatmap Analytics", key="heatmap_btn", use_container_width=True):
-            st.switch_page("pages/Heatmap_Comparison.py")
-    
-    # Key Benefits Section (Simplified)
-    st.markdown("<h2 style='text-align: center; color: #E8F4FD; margin: 3rem 0 2rem 0; font-family: \"Poppins\", sans-serif;'>🎯 Key Benefits</h2>", unsafe_allow_html=True)
-    
-    benefits_html = """
-    <div class="benefits-grid">
-        <div class="benefit-card">
-            <div class="benefit-icon">📊</div>
-            <h3 class="benefit-title">Data-Driven Decisions</h3>
-            <p class="benefit-text">Make informed decisions with AI-powered insights.</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">💰</div>
-            <h3 class="benefit-title">Reduce Food Waste</h3>
-            <p class="benefit-text">Optimize inventory with accurate forecasting.</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">⚡</div>
-            <h3 class="benefit-title">Operational Efficiency</h3>
-            <p class="benefit-text">Streamline operations with predictive analytics.</p>
-        </div>
-        <div class="benefit-card">
-            <div class="benefit-icon">🎯</div>
-            <h3 class="benefit-title">Strategic Planning</h3>
-            <p class="benefit-text">Identify trends and growth opportunities.</p>
-        </div>
-    </div>
-    """
-    st.markdown(benefits_html, unsafe_allow_html=True)
-    
-    # Key Statistics
-    st.markdown("<h2 style='text-align: center; color: #E8F4FD; margin: 3rem 0 2rem 0; font-family: \"Poppins\", sans-serif;'>📈 Platform Statistics</h2>", unsafe_allow_html=True)
-    
-    stats_html = """
-    <div class="stats-container">
-        <div class="stat-card">
-            <div class="stat-number">40+</div>
-            <div class="stat-label">Authentic Dishes</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">6</div>
-            <div class="stat-label">Outlet Locations</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">7</div>
-            <div class="stat-label">Day Forecasts</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">95%</div>
-            <div class="stat-label">Accuracy Rate</div>
-        </div>
-    </div>
-    """
-    st.markdown(stats_html, unsafe_allow_html=True)
-    
-    # Simple Call to Action
-    st.markdown("""
-    <div style="text-align: center; margin: 3rem 0;">
-        <h2 style="color: #E8F4FD; font-family: 'Poppins', sans-serif;">Ready to Get Started?</h2>
-        <p style="color: #BDC3C7; font-size: 1.1rem; margin-bottom: 2rem;">
-            Choose a tool above and start analyzing your restaurant data.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+        **🎯 Backend Features**:
+        - ✅ PostgreSQL Database
+        - ✅ JWT Authentication
+        - ✅ RESTful API Design
+        - ✅ Automatic Scaling
+        - ✅ Real-time Data
+        - ✅ Professional Deployment
+        - ✅ Interactive Documentation
+        - ✅ Error Handling
+        """)
     
     # Footer
+    st.markdown("---")
     st.markdown("""
-    <div class="footer">
-        <p>🍛 <strong>Kodi Kura Chitti Gaare</strong> - Powered by AI & Analytics</p>
-        <p>Built with ❤️ using Streamlit, Plotly, and advanced machine learning</p>
-        <p><em>Deployed on Streamlit Community Cloud - """ + datetime.now().strftime("%B %Y") + """</em></p>
+    <div style="text-align: center; padding: 2rem 0; color: #666;">
+        <h4 style="color: #FF6B35; margin-bottom: 1rem;">🍛 KKCG Analytics Platform</h4>
+        <p style="margin: 0;">Production-grade restaurant analytics with live backend integration</p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Powered by Streamlit • FastAPI • PostgreSQL • Railway Cloud</p>
     </div>
     """, unsafe_allow_html=True)
 

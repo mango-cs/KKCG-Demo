@@ -6,12 +6,65 @@ import pandas as pd
 import os
 
 class KKCGAPIClient:
-    """API client for KKCG Analytics Backend"""
+    """API client for KKCG Analytics Backend - Backend Only Mode"""
     
     def __init__(self, base_url: str = None):
-        self.base_url = base_url or os.getenv("API_BASE_URL", "http://localhost:8000")
+        # Use Railway backend URL - PRODUCTION ONLY
+        self.base_url = (
+            base_url or 
+            os.getenv("API_BASE_URL") or 
+            "https://kkcgbackend-production.up.railway.app"
+        )
         self.token = None
         self.headers = {"Content-Type": "application/json"}
+        
+        # Test connection on startup
+        self._validate_backend()
+    
+    def _validate_backend(self):
+        """Validate backend is accessible - REQUIRED"""
+        try:
+            response = requests.get(f"{self.base_url}/health", timeout=10)
+            if response.status_code != 200:
+                st.error(f"❌ Backend Error: Server returned {response.status_code}")
+                st.stop()
+        except requests.exceptions.ConnectionError:
+            st.error(f"❌ **Backend Connection Failed**")
+            st.error(f"Cannot connect to: `{self.base_url}`")
+            st.error("**Solution**: Ensure backend is running on Railway")
+            st.info("🔗 Check backend status: https://kkcgbackend-production.up.railway.app/docs")
+            st.stop()
+        except Exception as e:
+            st.error(f"❌ **Backend Error**: {str(e)}")
+            st.stop()
+    
+    def get_connection_status(self):
+        """Get backend connection status"""
+        try:
+            response = requests.get(f"{self.base_url}/health", timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                db_status = data.get('database', 'unknown')
+                
+                if db_status == "connected":
+                    return {
+                        "status": "🟢 Live PostgreSQL Database",
+                        "message": "Connected to production database",
+                        "color": "green"
+                    }
+                else:
+                    return {
+                        "status": "🟡 Backend Online (Demo Data)",
+                        "message": "Backend running with sample data",
+                        "color": "orange"
+                    }
+            else:
+                st.error(f"❌ Backend Error: HTTP {response.status_code}")
+                st.stop()
+        except Exception as e:
+            st.error(f"❌ **Backend Connection Lost**: {str(e)}")
+            st.error("🔗 Check: https://kkcgbackend-production.up.railway.app/health")
+            st.stop()
     
     def set_token(self, token: str):
         """Set authentication token"""
@@ -23,7 +76,8 @@ class KKCGAPIClient:
         try:
             response = requests.post(
                 f"{self.base_url}/auth/login",
-                json={"username": username, "password": password}
+                json={"username": username, "password": password},
+                timeout=30
             )
             
             if response.status_code == 200:
@@ -31,9 +85,14 @@ class KKCGAPIClient:
                 self.set_token(data["access_token"])
                 return {"success": True, "data": data}
             else:
-                return {"success": False, "error": response.json().get("detail", "Login failed")}
+                error_detail = response.json().get("detail", "Login failed")
+                return {"success": False, "error": error_detail}
         
+        except requests.exceptions.Timeout:
+            st.error("❌ **Request Timeout**: Backend is slow to respond")
+            return {"success": False, "error": "Request timeout - backend may be overloaded"}
         except requests.exceptions.RequestException as e:
+            st.error(f"❌ **Connection Error**: {str(e)}")
             return {"success": False, "error": f"Connection error: {str(e)}"}
     
     def register(self, username: str, email: str, password: str) -> Dict:
@@ -41,59 +100,65 @@ class KKCGAPIClient:
         try:
             response = requests.post(
                 f"{self.base_url}/auth/register",
-                json={"username": username, "email": email, "password": password}
+                json={"username": username, "email": email, "password": password},
+                timeout=30
             )
             
             if response.status_code == 200:
                 return {"success": True, "data": response.json()}
             else:
-                return {"success": False, "error": response.json().get("detail", "Registration failed")}
+                error_detail = response.json().get("detail", "Registration failed")
+                return {"success": False, "error": error_detail}
         
+        except requests.exceptions.Timeout:
+            st.error("❌ **Request Timeout**: Registration is taking too long")
+            return {"success": False, "error": "Request timeout during registration"}
         except requests.exceptions.RequestException as e:
+            st.error(f"❌ **Connection Error**: {str(e)}")
             return {"success": False, "error": f"Connection error: {str(e)}"}
     
     def get_outlets(self) -> List[Dict]:
-        """Get all outlets"""
+        """Get all outlets - BACKEND REQUIRED"""
         try:
-            response = requests.get(
-                f"{self.base_url}/outlets",
-                headers=self.headers
-            )
+            response = requests.get(f"{self.base_url}/outlets", headers=self.headers, timeout=30)
             
             if response.status_code == 200:
                 return response.json()
             else:
-                st.error(f"Failed to fetch outlets: {response.json().get('detail', 'Unknown error')}")
-                return []
+                st.error(f"❌ **API Error**: Failed to fetch outlets (HTTP {response.status_code})")
+                st.stop()
         
+        except requests.exceptions.Timeout:
+            st.error("❌ **Timeout**: Outlet data request timed out")
+            st.stop()
         except requests.exceptions.RequestException as e:
-            st.error(f"Connection error: {str(e)}")
-            return []
+            st.error(f"❌ **Connection Error**: {str(e)}")
+            st.stop()
     
     def get_dishes(self) -> List[Dict]:
-        """Get all dishes"""
+        """Get all dishes - BACKEND REQUIRED"""
         try:
-            response = requests.get(
-                f"{self.base_url}/dishes",
-                headers=self.headers
-            )
+            response = requests.get(f"{self.base_url}/dishes", headers=self.headers, timeout=30)
             
             if response.status_code == 200:
                 return response.json()
             else:
-                st.error(f"Failed to fetch dishes: {response.json().get('detail', 'Unknown error')}")
-                return []
+                st.error(f"❌ **API Error**: Failed to fetch dishes (HTTP {response.status_code})")
+                st.stop()
         
+        except requests.exceptions.Timeout:
+            st.error("❌ **Timeout**: Dish data request timed out")
+            st.stop()
         except requests.exceptions.RequestException as e:
-            st.error(f"Connection error: {str(e)}")
-            return []
+            st.error(f"❌ **Connection Error**: {str(e)}")
+            st.stop()
     
     def get_demand_data(self, 
                        start_date: Optional[datetime] = None,
                        end_date: Optional[datetime] = None,
                        outlet_id: Optional[int] = None,
                        dish_id: Optional[int] = None) -> pd.DataFrame:
-        """Get demand data as DataFrame"""
+        """Get demand data as DataFrame - BACKEND REQUIRED"""
         try:
             params = {}
             if start_date:
@@ -108,7 +173,8 @@ class KKCGAPIClient:
             response = requests.get(
                 f"{self.base_url}/demand-data",
                 headers=self.headers,
-                params=params
+                params=params,
+                timeout=30
             )
             
             if response.status_code == 200:
@@ -116,65 +182,73 @@ class KKCGAPIClient:
                 if data:
                     df = pd.DataFrame(data)
                     df['date'] = pd.to_datetime(df['date'])
+                    # Ensure column compatibility
+                    if 'outlet_name' in df.columns:
+                        df['outlet'] = df['outlet_name']
+                    if 'dish_name' in df.columns:
+                        df['dish'] = df['dish_name']
                     return df
                 else:
+                    st.warning("⚠️ **No Data**: Backend returned empty dataset")
                     return pd.DataFrame()
             else:
-                st.error(f"Failed to fetch demand data: {response.json().get('detail', 'Unknown error')}")
-                return pd.DataFrame()
+                st.error(f"❌ **API Error**: Failed to fetch demand data (HTTP {response.status_code})")
+                st.stop()
         
+        except requests.exceptions.Timeout:
+            st.error("❌ **Timeout**: Demand data request timed out")
+            st.stop()
         except requests.exceptions.RequestException as e:
-            st.error(f"Connection error: {str(e)}")
-            return pd.DataFrame()
+            st.error(f"❌ **Connection Error**: {str(e)}")
+            st.stop()
     
     def get_analytics_summary(self) -> Dict:
-        """Get analytics summary"""
+        """Get analytics summary - BACKEND REQUIRED"""
         try:
-            response = requests.get(
-                f"{self.base_url}/analytics/summary",
-                headers=self.headers
-            )
+            response = requests.get(f"{self.base_url}/analytics/summary", headers=self.headers, timeout=30)
             
             if response.status_code == 200:
                 return response.json()
             else:
-                st.error(f"Failed to fetch analytics: {response.json().get('detail', 'Unknown error')}")
-                return {}
+                st.error(f"❌ **API Error**: Failed to fetch analytics (HTTP {response.status_code})")
+                st.stop()
         
+        except requests.exceptions.Timeout:
+            st.error("❌ **Timeout**: Analytics request timed out")
+            st.stop()
         except requests.exceptions.RequestException as e:
-            st.error(f"Connection error: {str(e)}")
-            return {}
+            st.error(f"❌ **Connection Error**: {str(e)}")
+            st.stop()
     
     def seed_database(self) -> Dict:
         """Seed database with sample data"""
         try:
-            response = requests.post(
-                f"{self.base_url}/seed-data",
-                headers=self.headers
-            )
+            response = requests.post(f"{self.base_url}/seed-data", headers=self.headers, timeout=60)
             
             if response.status_code == 200:
                 return {"success": True, "message": response.json()["message"]}
             else:
-                return {"success": False, "error": response.json().get("detail", "Seeding failed")}
+                error_detail = response.json().get("detail", "Seeding failed")
+                return {"success": False, "error": error_detail}
         
+        except requests.exceptions.Timeout:
+            return {"success": False, "error": "Request timeout - seeding takes time, please wait"}
         except requests.exceptions.RequestException as e:
             return {"success": False, "error": f"Connection error: {str(e)}"}
     
     def health_check(self) -> bool:
         """Check if backend is accessible"""
         try:
-            response = requests.get(f"{self.base_url}/", timeout=5)
+            response = requests.get(f"{self.base_url}/health", timeout=10)
             return response.status_code == 200
         except:
             return False
 
+# Global API client instance
+@st.cache_resource
 def get_api_client() -> KKCGAPIClient:
-    """Get API client instance"""
-    if 'api_client' not in st.session_state:
-        st.session_state.api_client = KKCGAPIClient()
-    
-    return st.session_state.api_client
+    """Get cached API client instance"""
+    return KKCGAPIClient()
 
 def check_authentication():
     """Check if user is authenticated"""
@@ -184,52 +258,91 @@ def login_required(func):
     """Decorator to require authentication"""
     def wrapper(*args, **kwargs):
         if not check_authentication():
-            st.error("🔒 Please login to access this feature")
+            st.warning("🔐 **Authentication Required**")
+            st.info("Please login to access this feature")
             show_login_form()
             return None
         return func(*args, **kwargs)
     return wrapper
 
+def show_backend_status():
+    """Show backend connection status"""
+    client = get_api_client()
+    status_info = client.get_connection_status()
+    
+    # Create status indicator
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        if status_info["color"] == "green":
+            st.success(f"**{status_info['status']}** - {status_info['message']}")
+        elif status_info["color"] == "orange":
+            st.warning(f"**{status_info['status']}** - {status_info['message']}")
+        else:
+            st.info(f"**{status_info['status']}** - {status_info['message']}")
+
 def show_login_form():
     """Show login/register form"""
-    st.markdown("### 🔐 Authentication Required")
+    st.markdown("### 🔐 User Authentication")
     
     tab1, tab2 = st.tabs(["Login", "Register"])
     
     with tab1:
         with st.form("login_form"):
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            submit = st.form_submit_button("Login")
+            st.markdown("**Login to access all features**")
+            username = st.text_input("Username", placeholder="Enter your username")
+            password = st.text_input("Password", type="password", placeholder="Enter your password")
             
-            if submit:
-                if username and password:
-                    client = get_api_client()
+            col1, col2 = st.columns(2)
+            with col1:
+                submit = st.form_submit_button("Login", use_container_width=True)
+            with col2:
+                demo_login = st.form_submit_button("Demo Login", use_container_width=True)
+            
+            if submit and username and password:
+                client = get_api_client()
+                with st.spinner("Logging in..."):
                     result = client.login(username, password)
-                    
-                    if result["success"]:
-                        st.session_state.access_token = result["data"]["access_token"]
-                        st.session_state.username = username
-                        st.success("✅ Login successful!")
-                        st.rerun()
-                    else:
-                        st.error(f"❌ {result['error']}")
+                
+                if result["success"]:
+                    st.session_state.access_token = result["data"]["access_token"]
+                    st.session_state.username = username
+                    st.success("✅ Login successful!")
+                    st.rerun()
                 else:
-                    st.error("Please enter both username and password")
+                    st.error(f"❌ {result['error']}")
+            
+            elif demo_login:
+                client = get_api_client()
+                with st.spinner("Logging in with demo account..."):
+                    result = client.login("demo", "demo")
+                
+                if result["success"]:
+                    st.session_state.access_token = result["data"]["access_token"]
+                    st.session_state.username = "demo"
+                    st.success("✅ Demo login successful!")
+                    st.rerun()
+                else:
+                    st.error(f"❌ Demo login failed: {result['error']}")
+            
+            elif submit and (not username or not password):
+                st.error("Please enter both username and password")
     
     with tab2:
         with st.form("register_form"):
-            new_username = st.text_input("Choose Username")
-            email = st.text_input("Email")
-            new_password = st.text_input("Choose Password", type="password")
-            confirm_password = st.text_input("Confirm Password", type="password")
-            register = st.form_submit_button("Register")
+            st.markdown("**Create a new account**")
+            new_username = st.text_input("Choose Username", placeholder="Enter desired username")
+            email = st.text_input("Email", placeholder="Enter your email")
+            new_password = st.text_input("Choose Password", type="password", placeholder="Enter password")
+            confirm_password = st.text_input("Confirm Password", type="password", placeholder="Confirm password")
+            register = st.form_submit_button("Register", use_container_width=True)
             
             if register:
                 if new_username and email and new_password and confirm_password:
                     if new_password == confirm_password:
                         client = get_api_client()
-                        result = client.register(new_username, email, new_password)
+                        with st.spinner("Creating account..."):
+                            result = client.register(new_username, email, new_password)
                         
                         if result["success"]:
                             st.success("✅ Registration successful! Please login.")
@@ -240,13 +353,11 @@ def show_login_form():
                 else:
                     st.error("Please fill all fields")
 
-def show_backend_status():
-    """Show backend connection status"""
-    client = get_api_client()
-    
-    if client.health_check():
-        st.success("🟢 Backend Connected")
-        return True
-    else:
-        st.error("🔴 Backend Offline - Using Demo Mode")
-        return False 
+def logout():
+    """Logout user"""
+    if 'access_token' in st.session_state:
+        del st.session_state.access_token
+    if 'username' in st.session_state:
+        del st.session_state.username
+    st.success("✅ Logged out successfully")
+    st.rerun() 
