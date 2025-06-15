@@ -82,14 +82,6 @@ st.markdown("""
         border: 2px solid rgba(255,255,255,0.2);
     }
     
-    .filter-container {
-        background: #2a2a3e;
-        border-radius: 15px;
-        padding: 1.5rem;
-        border: 1px solid rgba(255,255,255,0.1);
-        margin: 1rem 0;
-    }
-    
     .performance-indicator {
         padding: 0.5rem 1rem;
         border-radius: 20px;
@@ -153,17 +145,17 @@ def create_interactive_heatmap(df, metric='predicted_demand', title="Demand Heat
         st.warning(f"⚠️ **No pivot data**: Unable to create heatmap from current data selection")
         return None
     
-    # Create heatmap
+    # Create heatmap with dark professional colors - custom color scheme for better differentiation
     fig = px.imshow(
         pivot_data.values,
         x=pivot_data.columns,
         y=pivot_data.index,
         aspect='auto',
-        color_continuous_scale='RdYlBu_r',
+        color_continuous_scale='Plasma',  # Dark, high-contrast color scheme perfect for dark themes
         title=f"{title} (Live Backend Data)"
     )
     
-    # Customize layout for dark theme
+    # Customize layout for dark theme with improved aesthetics
     fig.update_layout(
         title=dict(
             text=f"{title} (Live Backend Data)",
@@ -175,7 +167,14 @@ def create_interactive_heatmap(df, metric='predicted_demand', title="Demand Heat
         font=dict(color='white', size=12),
         height=600,
         xaxis_title="Outlets",
-        yaxis_title="Dishes"
+        yaxis_title="Dishes",
+        coloraxis_colorbar=dict(
+            title=dict(text=metric.replace('_', ' ').title(), font=dict(color='white')),
+            tickfont=dict(color='white'),
+            bgcolor='rgba(30,30,30,0.8)',
+            bordercolor='rgba(255,255,255,0.2)',
+            borderwidth=1
+        )
     )
     
     # Add custom hover template
@@ -383,51 +382,46 @@ def main():
     # Filter controls
     st.markdown("### 🎛️ Analysis Controls (Live Backend Data)")
     
-    with st.container():
-        st.markdown('<div class="filter-container">', unsafe_allow_html=True)
-        
-        filter_col1, filter_col2, filter_col3 = st.columns(3)
-        
-        with filter_col1:
-            # Date range filter
-            if 'date' in df.columns:
-                min_date = df['date'].min()
-                max_date = df['date'].max()
-                date_range = st.date_input(
-                    "📅 Date Range",
-                    value=(min_date, max_date),
-                    min_value=min_date,
-                    max_value=max_date
-                )
-                
-                # Filter dataframe by date
-                if len(date_range) == 2:
-                    start_date, end_date = date_range
-                    df = df[(df['date'] >= pd.Timestamp(start_date)) & (df['date'] <= pd.Timestamp(end_date))]
-            else:
-                st.info("📅 No date filtering available - backend data missing date column")
-        
-        with filter_col2:
-            # Metric selection
-            available_metrics = ['predicted_demand']
-            if 'actual_demand' in df.columns:
-                available_metrics.append('actual_demand')
+    filter_col1, filter_col2, filter_col3 = st.columns(3)
+    
+    with filter_col1:
+        # Date range filter
+        if 'date' in df.columns:
+            min_date = df['date'].min()
+            max_date = df['date'].max()
+            date_range = st.date_input(
+                "📅 Date Range",
+                value=(min_date, max_date),
+                min_value=min_date,
+                max_value=max_date
+            )
             
-            selected_metric = st.selectbox(
-                "📊 Metric to Analyze",
-                available_metrics,
-                format_func=lambda x: x.replace('_', ' ').title()
-            )
+            # Filter dataframe by date
+            if len(date_range) == 2:
+                start_date, end_date = date_range
+                df = df[(df['date'] >= pd.Timestamp(start_date)) & (df['date'] <= pd.Timestamp(end_date))]
+        else:
+            st.info("📅 No date filtering available - backend data missing date column")
+    
+    with filter_col2:
+        # Metric selection
+        available_metrics = ['predicted_demand']
+        if 'actual_demand' in df.columns:
+            available_metrics.append('actual_demand')
         
-        with filter_col3:
-            # Aggregation method
-            agg_method = st.selectbox(
-                "🔢 Aggregation Method",
-                ['mean', 'sum', 'max'],
-                format_func=lambda x: x.title()
-            )
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+        selected_metric = st.selectbox(
+            "📊 Metric to Analyze",
+            available_metrics,
+            format_func=lambda x: x.replace('_', ' ').title()
+        )
+    
+    with filter_col3:
+        # Aggregation method
+        agg_method = st.selectbox(
+            "🔢 Aggregation Method",
+            ['mean', 'sum', 'max'],
+            format_func=lambda x: x.title()
+        )
     
     st.markdown("---")
     
