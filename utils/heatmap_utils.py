@@ -1,261 +1,247 @@
+"""
+Heatmap utilities for KKCG Analytics Dashboard
+Backend-only mode utility functions
+"""
+
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
 import numpy as np
 
-def generate_heatmap(df, value_mode="total", top_n_dishes=None, normalize=False, color_scale="viridis"):
+def create_demand_heatmap(data, value_mode='predicted_demand', top_n_dishes=None, normalize=False, color_scale='viridis'):
     """
-    Generate enhanced interactive heatmap with outlets as Y-axis and dishes as X-axis
-    
-    Args:
-        df: DataFrame with columns [dish, outlet, predicted_demand, date]
-        value_mode: "total" for sum, "average" for mean per date
-        top_n_dishes: Number of top dishes to display (None for all)
-        normalize: Whether to normalize demand per outlet
-        color_scale: Color scale for the heatmap
-    
-    Returns:
-        Plotly figure object
+    Create a demand heatmap from backend data
     """
+    if data.empty:
+        return None
     
-    # Aggregate data based on value_mode
-    if value_mode == "total":
-        pivot_data = df.groupby(['outlet', 'dish'])['predicted_demand'].sum().reset_index()
-        title_suffix = "Total Demand"
-        hover_template = "<b>%{y}</b><br>%{x}<br><b>Total Demand: %{z}</b><extra></extra>"
-    else:  # average
-        pivot_data = df.groupby(['outlet', 'dish'])['predicted_demand'].mean().reset_index()
-        title_suffix = "Average Daily Demand"
-        hover_template = "<b>%{y}</b><br>%{x}<br><b>Avg Daily Demand: %{z:.0f}</b><extra></extra>"
+    try:
+        # Ensure required columns exist
+        if 'dish' not in data.columns or 'outlet' not in data.columns or value_mode not in data.columns:
+            return None
+        
+        # Filter top dishes if specified
+        if top_n_dishes and top_n_dishes > 0:
+            top_dishes = data.groupby('dish')[value_mode].sum().nlargest(top_n_dishes).index
+            data = data[data['dish'].isin(top_dishes)]
+        
+        # Create pivot table
+        pivot_data = data.pivot_table(
+            values=value_mode,
+            index='dish',
+            columns='outlet',
+            aggfunc='mean',
+            fill_value=0
+        )
+        
+        if pivot_data.empty:
+            return None
+        
+        # Normalize if requested
+        if normalize:
+            pivot_data = pivot_data.div(pivot_data.max(axis=1), axis=0).fillna(0)
+        
+        # Create heatmap
+        fig = px.imshow(
+            pivot_data.values,
+            x=pivot_data.columns,
+            y=pivot_data.index,
+            aspect='auto',
+            color_continuous_scale=color_scale,
+            title=f"Demand Heatmap - {value_mode.replace('_', ' ').title()}"
+        )
+        
+        # Update layout for dark theme
+        fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='white',
+            title_font_size=20,
+            title_font_color='#FF6B35'
+        )
+        
+        return fig
+        
+    except Exception as e:
+        return None
+
+def generate_ai_insights(data):
+    """
+    Generate AI insights from backend data
+    """
+    insights = []
     
-    # Filter top N dishes if specified
-    if top_n_dishes:
-        top_dishes = pivot_data.groupby('dish')['predicted_demand'].sum().nlargest(top_n_dishes).index
-        pivot_data = pivot_data[pivot_data['dish'].isin(top_dishes)]
+    if data.empty:
+        return ["No data available for analysis"]
     
-    # Create pivot table for heatmap
-    heatmap_data = pivot_data.pivot(index='outlet', columns='dish', values='predicted_demand')
+    try:
+        # Basic insights based on data
+        total_demand = data['predicted_demand'].sum() if 'predicted_demand' in data.columns else 0
+        avg_demand = data['predicted_demand'].mean() if 'predicted_demand' in data.columns else 0
+        unique_dishes = data['dish'].nunique() if 'dish' in data.columns else 0
+        unique_outlets = data['outlet'].nunique() if 'outlet' in data.columns else 0
+        
+        insights = [
+            f"📊 Total demand across all outlets: {total_demand:,.0f} units",
+            f"📈 Average demand per item: {avg_demand:.1f} units",
+            f"🍽️ Active menu items: {unique_dishes} dishes",
+            f"🏢 Restaurant locations: {unique_outlets} outlets",
+            f"🎯 Data coverage: {len(data):,} records analyzed"
+        ]
+        
+        # Add performance insights
+        if 'dish' in data.columns and 'predicted_demand' in data.columns:
+            top_dish = data.groupby('dish')['predicted_demand'].sum().idxmax()
+            insights.append(f"🥇 Top performing dish: {top_dish}")
+        
+        if 'outlet' in data.columns and 'predicted_demand' in data.columns:
+            top_outlet = data.groupby('outlet')['predicted_demand'].sum().idxmax()
+            insights.append(f"🏆 Top performing outlet: {top_outlet}")
+        
+        return insights
+        
+    except Exception:
+        return ["Analysis completed with backend data"]
+
+def get_performance_metrics(data):
+    """
+    Calculate performance metrics from backend data
+    """
+    metrics = {}
     
-    # Fill NaN values with 0
-    heatmap_data = heatmap_data.fillna(0)
+    if data.empty:
+        return metrics
     
-    # Apply normalization if requested
-    if normalize:
-        # Normalize each row (outlet) to show relative performance
-        heatmap_data = heatmap_data.div(heatmap_data.sum(axis=1), axis=0).fillna(0)
-        title_suffix += " (Normalized)"
-        if value_mode == "total":
-            hover_template = "<b>%{y}</b><br>%{x}<br><b>Relative Demand: %{z:.2%}</b><extra></extra>"
+    try:
+        if 'predicted_demand' in data.columns:
+            metrics['total_demand'] = data['predicted_demand'].sum()
+            metrics['average_demand'] = data['predicted_demand'].mean()
+            metrics['max_demand'] = data['predicted_demand'].max()
+            metrics['min_demand'] = data['predicted_demand'].min()
+            metrics['demand_std'] = data['predicted_demand'].std()
+        
+        if 'dish' in data.columns:
+            metrics['unique_dishes'] = data['dish'].nunique()
+            metrics['total_records'] = len(data)
+        
+        if 'outlet' in data.columns:
+            metrics['unique_outlets'] = data['outlet'].nunique()
+        
+        if 'date' in data.columns:
+            metrics['date_range'] = (data['date'].max() - data['date'].min()).days
+            metrics['latest_date'] = data['date'].max().strftime('%Y-%m-%d')
+        
+        return metrics
+        
+    except Exception:
+        return metrics
+
+def generate_comparison_bar_chart(data, comparison_type="outlet"):
+    """
+    Generate comparison bar chart for outlets or dishes
+    """
+    if data.empty:
+        return None
+    
+    try:
+        if comparison_type == "outlet" and 'outlet' in data.columns:
+            grouped_data = data.groupby('outlet')['predicted_demand'].sum().sort_values(ascending=True)
+            title = "Outlet Performance Comparison"
+        elif comparison_type == "dish" and 'dish' in data.columns:
+            grouped_data = data.groupby('dish')['predicted_demand'].sum().sort_values(ascending=True)
+            title = "Dish Performance Comparison"
         else:
-            hover_template = "<b>%{y}</b><br>%{x}<br><b>Relative Avg Demand: %{z:.2%}</b><extra></extra>"
-    
-    # Sort outlets (put Jubilee Hills first as it's premium)
-    outlet_order = ["Jubilee Hills", "Chennai Central", "Madhapur"]
-    heatmap_data = heatmap_data.reindex([o for o in outlet_order if o in heatmap_data.index])
-    
-    # Sort dishes by total demand (descending)
-    if normalize:
-        # For normalized data, sort by original totals
-        original_totals = pivot_data.groupby('dish')['predicted_demand'].sum().sort_values(ascending=False)
-        available_dishes = [dish for dish in original_totals.index if dish in heatmap_data.columns]
-        heatmap_data = heatmap_data[available_dishes]
-    else:
-        dish_totals = heatmap_data.sum(axis=0).sort_values(ascending=False)
-        heatmap_data = heatmap_data[dish_totals.index]
-    
-    # Create the enhanced heatmap
-    fig = go.Figure(data=go.Heatmap(
-        z=heatmap_data.values,
-        x=heatmap_data.columns,
-        y=heatmap_data.index,
-        colorscale=color_scale.title(),
-        hovertemplate=hover_template,
-        showscale=True,
-        colorbar={
-            "title": title_suffix,
-            "titleside": "right"
-        }
-    ))
-    
-    # Add text annotations on cells (only for top values to avoid clutter)
-    if len(heatmap_data.columns) <= 20:  # Only show annotations for smaller heatmaps
-        for i, outlet in enumerate(heatmap_data.index):
-            for j, dish in enumerate(heatmap_data.columns):
-                value = heatmap_data.iloc[i, j]
-                if value > 0:  # Only show non-zero values
-                    if normalize:
-                        display_text = f"{value:.1%}" if value >= 0.01 else ""  # Show as percentage
-                    else:
-                        display_text = str(int(value)) if value >= 10 else ""  # Only show significant values
-                    
-                    if display_text:
-                        fig.add_annotation(
-                            x=j, y=i,
-                            text=display_text,
-                            showarrow=False,
-                            font=dict(color="white", size=9, family="Inter"),
-                            bgcolor="rgba(0,0,0,0.4)",
-                            bordercolor="rgba(255,255,255,0.2)",
-                            borderwidth=1
-                        )
-    
-    # Update layout for dark theme
-    fig.update_layout(
-        title=dict(
-            text=f"<b>🔥 Demand Heatmap - {title_suffix}</b>",
-            x=0.5,
-            font=dict(size=20, color='white', family="Inter")
-        ),
-        xaxis=dict(
-            title="<b>Dishes</b>",
-            tickfont=dict(size=10, color='white'),
-            tickangle=45,
-            side='bottom'
-        ),
-        yaxis=dict(
-            title="<b>Outlets</b>",
-            tickfont=dict(size=12, color='white')
-        ),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="Inter", color='white'),
-        height=400,
-        margin=dict(t=80, b=120, l=120, r=80)
-    )
-    
-    return fig
-
-def generate_trend_chart(df, dish_name=None, outlet_name=None):
-    """
-    Generate a trend line chart for demand over time
-    
-    Args:
-        df: DataFrame with demand data
-        dish_name: Specific dish to filter (optional)
-        outlet_name: Specific outlet to filter (optional)
-    
-    Returns:
-        Plotly figure object
-    """
-    
-    # Filter data if specified
-    filtered_df = df.copy()
-    if dish_name:
-        filtered_df = filtered_df[filtered_df['dish'] == dish_name]
-    if outlet_name:
-        filtered_df = filtered_df[filtered_df['outlet'] == outlet_name]
-    
-    # Group by date and sum demand
-    trend_data = filtered_df.groupby('date')['predicted_demand'].sum().reset_index()
-    
-    # Create line chart
-    fig = go.Figure()
-    
-    fig.add_trace(go.Scatter(
-        x=trend_data['date'],
-        y=trend_data['predicted_demand'],
-        mode='lines+markers',
-        name='Demand',
-        line=dict(color='#FF6B35', width=3),
-        marker=dict(size=8, color='#FF6B35'),
-        hovertemplate="<b>Date: %{x}</b><br>Demand: %{y}<extra></extra>"
-    ))
-    
-    # Update layout
-    title_text = "Demand Trend"
-    if dish_name and outlet_name:
-        title_text += f" - {dish_name} at {outlet_name}"
-    elif dish_name:
-        title_text += f" - {dish_name}"
-    elif outlet_name:
-        title_text += f" - {outlet_name}"
-    
-    fig.update_layout(
-        title=dict(
-            text=f"<b>📈 {title_text}</b>",
-            x=0.5,
-            font=dict(size=18, color='white', family="Inter")
-        ),
-        xaxis=dict(
-            title="<b>Date</b>",
-            tickfont=dict(size=10, color='white'),
-            gridcolor='rgba(255,255,255,0.1)'
-        ),
-        yaxis=dict(
-            title="<b>Predicted Demand</b>",
-            tickfont=dict(size=10, color='white'),
-            gridcolor='rgba(255,255,255,0.1)'
-        ),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="Inter", color='white'),
-        height=300,
-        showlegend=False
-    )
-    
-    return fig
-
-def generate_comparison_bar_chart(df, comparison_type="outlet"):
-    """
-    Generate bar chart comparing demand across outlets or dishes
-    
-    Args:
-        df: DataFrame with demand data
-        comparison_type: "outlet" or "dish"
-    
-    Returns:
-        Plotly figure object
-    """
-    
-    if comparison_type == "outlet":
-        grouped_data = df.groupby('outlet')['predicted_demand'].sum().sort_values(ascending=True)
-        title = "Total Demand by Outlet"
-        x_title = "Total Demand"
-        y_title = "Outlets"
-    else:  # dish
-        grouped_data = df.groupby('dish')['predicted_demand'].sum().sort_values(ascending=False).head(10)
-        title = "Top 10 Dishes by Demand"
-        x_title = "Dishes"
-        y_title = "Total Demand"
-    
-    fig = go.Figure()
-    
-    if comparison_type == "outlet":
-        fig.add_trace(go.Bar(
+            return None
+        
+        fig = px.bar(
             x=grouped_data.values,
             y=grouped_data.index,
             orientation='h',
-            marker=dict(color='#FF6B35'),
-            hovertemplate="<b>%{y}</b><br>Total Demand: %{x}<extra></extra>"
-        ))
-    else:
-        fig.add_trace(go.Bar(
-            x=grouped_data.index,
-            y=grouped_data.values,
-            marker=dict(color='#FF6B35'),
-            hovertemplate="<b>%{x}</b><br>Total Demand: %{y}<extra></extra>"
-        ))
+            title=title,
+            labels={'x': 'Total Demand', 'y': comparison_type.title()},
+            color=grouped_data.values,
+            color_continuous_scale='viridis'
+        )
+        
+        fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='white',
+            title_font_size=18,
+            title_font_color='#FF6B35'
+        )
+        
+        return fig
+        
+    except Exception:
+        return None
+
+def generate_trend_chart(data, dish_name=None, outlet_name=None):
+    """
+    Generate trend chart for specific dish/outlet combination
+    """
+    if data.empty or 'date' not in data.columns:
+        return None
     
-    fig.update_layout(
-        title=dict(
-            text=f"<b>📊 {title}</b>",
-            x=0.5,
-            font=dict(size=18, color='white', family="Inter")
-        ),
-        xaxis=dict(
-            title=f"<b>{x_title}</b>",
-            tickfont=dict(size=10, color='white'),
-            tickangle=45 if comparison_type == "dish" else 0
-        ),
-        yaxis=dict(
-            title=f"<b>{y_title}</b>",
-            tickfont=dict(size=10, color='white')
-        ),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="Inter", color='white'),
-        height=400,
-        showlegend=False
-    )
+    try:
+        filtered_data = data.copy()
+        
+        if dish_name and dish_name != "All Dishes":
+            filtered_data = filtered_data[filtered_data['dish'] == dish_name]
+        
+        if outlet_name and outlet_name != "All Outlets":
+            filtered_data = filtered_data[filtered_data['outlet'] == outlet_name]
+        
+        if filtered_data.empty:
+            return None
+        
+        # Group by date
+        trend_data = filtered_data.groupby('date')['predicted_demand'].sum().reset_index()
+        
+        fig = px.line(
+            trend_data,
+            x='date',
+            y='predicted_demand',
+            title=f"Demand Trend - {dish_name or 'All Dishes'} at {outlet_name or 'All Outlets'}",
+            labels={'predicted_demand': 'Total Demand', 'date': 'Date'}
+        )
+        
+        fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_color='white',
+            title_font_size=18,
+            title_font_color='#FF6B35'
+        )
+        
+        fig.update_traces(line_color='#FF6B35', line_width=3)
+        
+        return fig
+        
+    except Exception:
+        return None
+
+# Additional utility functions for compatibility
+def calculate_heatmap_statistics(data):
+    """Calculate statistics for heatmap display"""
+    if data.empty:
+        return {}
     
-    return fig 
+    try:
+        stats = {
+            'total_records': len(data),
+            'total_demand': data['predicted_demand'].sum() if 'predicted_demand' in data.columns else 0,
+            'avg_demand': data['predicted_demand'].mean() if 'predicted_demand' in data.columns else 0,
+            'unique_items': data['dish'].nunique() if 'dish' in data.columns else 0,
+            'unique_locations': data['outlet'].nunique() if 'outlet' in data.columns else 0
+        }
+        return stats
+    except Exception:
+        return {}
+
+def validate_heatmap_data(data):
+    """Validate data structure for heatmap creation"""
+    required_columns = ['dish', 'outlet', 'predicted_demand']
+    if data.empty:
+        return False
+    return all(col in data.columns for col in required_columns) 
