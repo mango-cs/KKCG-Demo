@@ -48,14 +48,14 @@ class KKCGAPIClient:
                 
                 if db_status == "connected":
                     return {
-                        "status": "🟢 Live PostgreSQL Database",
-                        "message": "Connected to production database",
+                        "status": "🟢 Live",
+                        "message": "PostgreSQL",
                         "color": "green"
                     }
                 else:
                     return {
-                        "status": "🟡 Backend Online (Demo Data)",
-                        "message": "Backend running with sample data",
+                        "status": "🟡 Demo",
+                        "message": "Sample Data",
                         "color": "orange"
                     }
             else:
@@ -268,16 +268,13 @@ def show_backend_status():
     client = get_api_client()
     status_info = client.get_connection_status()
     
-    # Create status indicator
-    col1, col2, col3 = st.columns([1, 2, 1])
-    
-    with col2:
-        if status_info["color"] == "green":
-            st.success(f"**{status_info['status']}** - {status_info['message']}")
-        elif status_info["color"] == "orange":
-            st.warning(f"**{status_info['status']}** - {status_info['message']}")
-        else:
-            st.info(f"**{status_info['status']}** - {status_info['message']}")
+    # Compact status display
+    if status_info["color"] == "green":
+        st.success(f"**{status_info['status']}**")
+    elif status_info["color"] == "orange":
+        st.warning(f"**{status_info['status']}**")
+    else:
+        st.info(f"**{status_info['status']}**")
 
 def show_login_form():
     """Show login/register form"""
