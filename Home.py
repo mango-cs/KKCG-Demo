@@ -287,6 +287,68 @@ st.markdown("""
         box-shadow: 0 8px 25px rgba(255,107,53,0.4);
     }
     
+    /* Benefits section */
+    .benefits-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin: 2.5rem 0;
+    }
+    
+    .benefit-card {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 15px;
+        padding: 1.8rem;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+    }
+    
+    .benefit-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,107,53,0.08), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .benefit-card:hover::before {
+        left: 100%;
+    }
+    
+    .benefit-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(255,107,53,0.15);
+        border: 1px solid rgba(255,107,53,0.3);
+    }
+    
+    .benefit-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .benefit-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #FF6B35;
+        margin-bottom: 0.8rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .benefit-description {
+        color: #BDC3C7;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        font-family: 'Inter', sans-serif;
+    }
+
     /* Quick actions section */
     .quick-actions {
         background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
@@ -338,7 +400,13 @@ st.markdown("""
         .main-subtitle { font-size: 1.2rem; }
         .tools-container { grid-template-columns: 1fr; }
         .metrics-container { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .benefits-container { grid-template-columns: repeat(2, 1fr); }
         .tool-card { padding: 2rem; }
+        .benefit-card { padding: 1.5rem; }
+    }
+    
+    @media (max-width: 480px) {
+        .benefits-container { grid-template-columns: 1fr; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -549,6 +617,56 @@ def main():
     with col2:
         if st.button("🔥 Launch Heatmap Analytics", use_container_width=True, type="primary"):
             st.switch_page("pages/Heatmap_Comparison.py")
+    
+    st.markdown("---")
+    
+    # Benefits Section
+    st.markdown("### 💡 Platform Benefits")
+    
+    st.markdown("""
+    <div class="benefits-container">
+        <div class="benefit-card">
+            <div class="benefit-icon">📈</div>
+            <h4 class="benefit-title">Boost Revenue</h4>
+            <p class="benefit-description">Increase sales by 15-25% with optimized inventory and demand forecasting</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">🎯</div>
+            <h4 class="benefit-title">Reduce Waste</h4>
+            <p class="benefit-description">Cut food waste by 30% through accurate demand predictions and smart planning</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">⚡</div>
+            <h4 class="benefit-title">Save Time</h4>
+            <p class="benefit-description">Automate 80% of planning tasks with AI-powered insights and recommendations</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">💰</div>
+            <h4 class="benefit-title">Cost Control</h4>
+            <p class="benefit-description">Lower operational costs by 20% with efficient resource allocation</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">🔮</div>
+            <h4 class="benefit-title">Future Ready</h4>
+            <p class="benefit-description">Stay ahead with 7-day forecasts and seasonal trend analysis</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">📊</div>
+            <h4 class="benefit-title">Data Driven</h4>
+            <p class="benefit-description">Make confident decisions backed by real-time analytics and insights</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">🏆</div>
+            <h4 class="benefit-title">Competitive Edge</h4>
+            <p class="benefit-description">Outperform competitors with advanced ML-powered business intelligence</p>
+        </div>
+        <div class="benefit-card">
+            <div class="benefit-icon">📱</div>
+            <h4 class="benefit-title">Easy to Use</h4>
+            <p class="benefit-description">User-friendly interface that requires no technical expertise to operate</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Quick Actions Section
     st.markdown("### ⚡ Quick Actions")
