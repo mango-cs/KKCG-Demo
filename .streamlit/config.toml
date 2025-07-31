@@ -10,10 +10,17 @@ font = "sans serif"
 headless = true
 port = 8501
 maxUploadSize = 200
+enableCORS = true
+enableXsrfProtection = true
 
 [browser]
 gatherUsageStats = false
-showErrorDetails = true
+showErrorDetails = false
 
 [client]
-showErrorDetails = true 
+showErrorDetails = false
+
+# Performance optimizations to reduce warnings
+[global]
+developmentMode = false
+showWarningOnDirectExecution = false 

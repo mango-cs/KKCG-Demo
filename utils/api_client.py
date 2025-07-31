@@ -4,6 +4,7 @@ import streamlit as st
 from typing import Dict, List, Optional
 import json
 from datetime import datetime
+import pandas as pd
 
 class KKCGAPIClient:
     """API client for KKCG Analytics backend"""
