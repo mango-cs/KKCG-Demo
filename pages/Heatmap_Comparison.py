@@ -17,6 +17,7 @@ from utils.api_client import (
     show_backend_status, 
     check_authentication
 )
+from utils.translations import t, create_language_selector
 
 # Page configuration
 st.set_page_config(
@@ -25,6 +26,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Add language selector to sidebar
+with st.sidebar:
+    st.markdown("---")
+    create_language_selector()
+    st.markdown("---")
 
 # Enhanced CSS matching the design system
 st.markdown("""
@@ -579,16 +586,16 @@ def main():
     
     # Check authentication
     if not check_authentication():
-        st.error("🔒 **Access Denied**: Please log in from the Home page to access Heatmap Analytics.")
-        if st.button("🏠 Go to Home Page", type="primary"):
+        st.error(f"🔒 **{t('access_denied')}**: Please log in from the Home page to access Heatmap Analytics.")
+        if st.button(f"🏠 {t('go_to_home')}", type="primary"):
             st.switch_page("Home.py")
         return
     
     # Header
-    st.markdown("""
+    st.markdown(f"""
     <div class="main-header">
-        <h1 class="main-title">🔥 Interactive Heatmap Analytics</h1>
-        <p class="main-subtitle">Real-time Performance Visualization & AI-Powered Business Insights</p>
+        <h1 class="main-title">🔥 {t('interactive_heatmap_analytics_title')}</h1>
+        <p class="main-subtitle">{t('heatmap_subtitle')}</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -596,15 +603,15 @@ def main():
     col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
     
     with col1:
-        if st.button("🏠 Home", use_container_width=True):
+        if st.button(f"🏠 {t('home')}", use_container_width=True):
             st.switch_page("Home.py")
     
     with col2:
-        if st.button("🔮 AI Forecasting", use_container_width=True):
+        if st.button(f"🔮 {t('forecasting_tool')}", use_container_width=True):
             st.switch_page("pages/Forecasting_Tool.py")
     
     with col3:
-        if st.button("⚙️ Settings", use_container_width=True):
+        if st.button(f"⚙️ {t('settings')}", use_container_width=True):
             st.switch_page("pages/Settings.py")
     
     with col4:
@@ -613,11 +620,11 @@ def main():
     st.markdown("---")
     
     # Load data from backend
-    with st.spinner("🔄 Loading heatmap data from backend..."):
+    with st.spinner(f"🔄 {t('loading_data')}"):
         df = load_heatmap_data()
     
     if df.empty:
-        st.error("❌ **No data available for heatmap analysis**")
+        st.error(f"❌ **{t('no_data_available')} for heatmap analysis**")
         st.info("""
         **To use the heatmap analytics:**
         1. Go to Settings and click 'Seed Database' to populate with sample data
@@ -627,17 +634,17 @@ def main():
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("⚙️ Go to Settings", type="primary", use_container_width=True):
+            if st.button(f"⚙️ Go to {t('settings')}", type="primary", use_container_width=True):
                 st.switch_page("pages/Settings.py")
         with col2:
-            if st.button("🏠 Back to Home", use_container_width=True):
+            if st.button(f"🏠 {t('back_to_home')}", use_container_width=True):
                 st.switch_page("Home.py")
         return
     
     # Enhanced control panel
-    st.markdown("""
+    st.markdown(f"""
     <div class="control-panel">
-        <h3>🎛️ Analysis Controls</h3>
+        <h3>🎛️ {t('analysis_controls')}</h3>
     </div>
     """, unsafe_allow_html=True)
     
@@ -649,7 +656,7 @@ def main():
             min_date = df['date'].min()
             max_date = df['date'].max()
             date_range = st.date_input(
-                "📅 Date Range",
+                f"📅 {t('date_range')}",
                 value=(min_date, max_date),
                 min_value=min_date,
                 max_value=max_date,
@@ -661,7 +668,7 @@ def main():
                 start_date, end_date = date_range
                 df = df[(df['date'] >= pd.Timestamp(start_date)) & (df['date'] <= pd.Timestamp(end_date))]
         else:
-            st.info("📅 No date filtering available - backend data missing date column")
+            st.info(f"📅 No date filtering available - backend data missing date column")
     
     with filter_col2:
         # Metric selection
@@ -670,7 +677,7 @@ def main():
             available_metrics.append('actual_demand')
         
         selected_metric = st.selectbox(
-            "📊 Metric to Analyze",
+            f"📊 {t('metric_to_analyze')}",
             available_metrics,
             format_func=lambda x: x.replace('_', ' ').title(),
             help="Choose the metric for heatmap visualization"
@@ -679,7 +686,7 @@ def main():
     with filter_col3:
         # Aggregation method
         agg_method = st.selectbox(
-            "🔢 Aggregation Method",
+            f"🔢 {t('aggregation_method')}",
             ['mean', 'sum', 'max'],
             format_func=lambda x: x.title(),
             help="Select how to aggregate the data"
@@ -695,30 +702,30 @@ def main():
     # Data overview
     st.markdown(f"""
     <div class="stats-highlight">
-        <h3>📊 Live Data Overview</h3>
+        <h3>📊 {t('live_data_overview')}</h3>
         <div class="stats-grid">
             <div class="stat-item">
                 <div class="stat-value">{len(df):,}</div>
-                <div class="stat-label">Total Records</div>
+                <div class="stat-label">{t('total_records')}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value">{df['dish'].nunique()}</div>
-                <div class="stat-label">Unique Dishes</div>
+                <div class="stat-label">{t('unique_dishes')}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value">{df['outlet'].nunique()}</div>
-                <div class="stat-label">Active Outlets</div>
+                <div class="stat-label">{t('active_outlets')}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value">{df['predicted_demand'].sum():,.0f}</div>
-                <div class="stat-label">Total Demand</div>
+                <div class="stat-label">{t('total_demand')}</div>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     # Main heatmap visualization
-    st.markdown("### 🔥 Interactive Demand Heatmap")
+    st.markdown(f"### 🔥 {t('interactive_demand_heatmap')}")
     
     heatmap_fig = create_interactive_heatmap(
         df, 

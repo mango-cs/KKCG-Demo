@@ -25,6 +25,7 @@ from utils.api_client import (
     show_backend_status, 
     check_authentication
 )
+from utils.translations import t, create_language_selector
 
 # Suppress warnings for cleaner output
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -37,6 +38,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Add language selector to sidebar
+with st.sidebar:
+    st.markdown("---")
+    create_language_selector()
+    st.markdown("---")
 
 # Enhanced CSS matching Home page design
 st.markdown("""
@@ -504,16 +511,16 @@ def main():
     
     # Check authentication
     if not check_authentication():
-        st.error("🔒 **Access Denied**: Please log in from the Home page to access the Forecasting Tool.")
-        if st.button("🏠 Go to Home Page", type="primary"):
+        st.error(f"🔒 **{t('access_denied')}**: Please log in from the Home page to access the Forecasting Tool.")
+        if st.button(f"🏠 {t('go_to_home')}", type="primary"):
             st.switch_page("Home.py")
         return
     
     # Header
-    st.markdown("""
+    st.markdown(f"""
     <div class="main-header">
-        <h1 class="main-title">🔮 AI Demand Forecasting</h1>
-        <p class="main-subtitle">Advanced Machine Learning Predictions with Live Backend Integration</p>
+        <h1 class="main-title">🔮 {t('ai_demand_forecasting_title')}</h1>
+        <p class="main-subtitle">{t('forecasting_subtitle')}</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -521,15 +528,15 @@ def main():
     col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
     
     with col1:
-        if st.button("🏠 Home", use_container_width=True):
+        if st.button(f"🏠 {t('home')}", use_container_width=True):
             st.switch_page("Home.py")
     
     with col2:
-        if st.button("🔥 Heatmap Analytics", use_container_width=True):
+        if st.button(f"🔥 {t('heatmap_analytics')}", use_container_width=True):
             st.switch_page("pages/Heatmap_Comparison.py")
     
     with col3:
-        if st.button("⚙️ Settings", use_container_width=True):
+        if st.button(f"⚙️ {t('settings')}", use_container_width=True):
             st.switch_page("pages/Settings.py")
     
     with col4:
@@ -564,9 +571,9 @@ def main():
     available_outlets = ["All Outlets"] + sorted(historical_data['outlet'].unique().tolist())
     
     # Enhanced control panel
-    st.markdown("""
+    st.markdown(f"""
     <div class="control-panel">
-        <h3>🎛️ Forecasting Controls</h3>
+        <h3>🎛️ {t('forecasting_controls')}</h3>
     </div>
     """, unsafe_allow_html=True)
     
@@ -574,7 +581,7 @@ def main():
     
     with control_col1:
         selected_dish = st.selectbox(
-            "📊 Select Dish",
+            f"📊 {t('select_dish')}",
             available_dishes,
             index=0,
             help="Choose a specific dish or analyze all dishes"
@@ -582,7 +589,7 @@ def main():
     
     with control_col2:
         selected_outlet = st.selectbox(
-            "🏢 Select Outlet", 
+            f"🏢 {t('select_outlet')}", 
             available_outlets,
             index=0,
             help="Choose a specific outlet or analyze all outlets"
@@ -590,10 +597,10 @@ def main():
     
     with control_col3:
         forecast_horizon = st.selectbox(
-            "📅 Forecast Horizon",
+            f"📅 {t('forecast_horizon')}",
             [7, 14, 30],
             index=0,
-            format_func=lambda x: f"{x} days",
+            format_func=lambda x: f"{x} {t('days')}",
             help="Select the number of days to forecast"
         )
     
@@ -608,13 +615,13 @@ def main():
             forecast_data = pd.DataFrame()
     
     # Enhanced metrics dashboard
-    st.markdown("### 📊 Performance Metrics")
+    st.markdown(f"### 📊 {t('performance_metrics')}")
     create_metrics_cards(historical_data, selected_dish, selected_outlet)
     
     st.markdown("---")
     
     # Main forecast visualization
-    st.markdown("### 📈 AI-Powered Forecast Visualization")
+    st.markdown(f"### 📈 {t('forecast_visualization')}")
     
     forecast_fig = create_forecast_visualization(
         historical_data, 
@@ -632,32 +639,32 @@ def main():
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("### 📈 Demand Breakdown")
+        st.markdown(f"### 📈 {t('demand_breakdown')}")
         breakdown_fig = create_demand_breakdown(historical_data, selected_outlet)
         if breakdown_fig:
             st.plotly_chart(breakdown_fig, use_container_width=True)
         else:
-            st.info("📊 **Breakdown chart requires data**")
+            st.info(f"📊 **{t('chart_requires_data')}**")
     
     with col2:
-        st.markdown("### 🎯 AI Insights & Analysis")
+        st.markdown(f"### 🎯 {t('ai_insights_analysis')}")
         
         # Enhanced insights section
-        st.markdown("""
+        st.markdown(f"""
         <div class="insights-section">
             <div class="insight-item">
-                <h4 style="color: #FF6B35; margin-bottom: 0.5rem;">🔮 Forecast Confidence</h4>
-                <p>Current predictions show <span class="confidence-high">High Confidence</span> based on historical patterns and trend analysis.</p>
+                <h4 style="color: #FF6B35; margin-bottom: 0.5rem;">🔮 {t('forecast_confidence')}</h4>
+                <p>{t('confidence_desc')}</p>
             </div>
             
             <div class="insight-item">
-                <h4 style="color: #FF6B35; margin-bottom: 0.5rem;">📈 Trend Analysis</h4>
-                <p>Demand shows steady growth with seasonal variations. Peak periods align with festival seasons and weekends.</p>
+                <h4 style="color: #FF6B35; margin-bottom: 0.5rem;">📈 {t('trend_analysis')}</h4>
+                <p>{t('trend_desc')}</p>
             </div>
             
             <div class="insight-item">
-                <h4 style="color: #FF6B35; margin-bottom: 0.5rem;">💡 Recommendations</h4>
-                <p>Consider increasing inventory for high-demand items and optimizing staff scheduling based on predicted peaks.</p>
+                <h4 style="color: #FF6B35; margin-bottom: 0.5rem;">💡 {t('recommendations')}</h4>
+                <p>{t('recommendations_desc')}</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -670,40 +677,40 @@ def main():
         st.markdown(f"""
         <div class="prediction-box">
             <div class="prediction-value">{avg_forecast:.0f}</div>
-            <div class="prediction-label">Average Daily Forecast for Next {forecast_horizon} Days</div>
+            <div class="prediction-label">{t('average_daily_forecast')} {forecast_horizon} {t('days')}</div>
         </div>
         """, unsafe_allow_html=True)
     
     # Action buttons
-    st.markdown("### ⚡ Quick Actions")
+    st.markdown(f"### ⚡ {t('quick_actions')}")
     
     export_col1, export_col2, export_col3 = st.columns(3)
     
     with export_col1:
-        if st.button("📊 Export Data", use_container_width=True):
+        if st.button(f"📊 {t('export_data')}", use_container_width=True):
             if not historical_data.empty:
                 csv_data = historical_data.to_csv(index=False)
                 st.download_button(
-                    label="⬇️ Download CSV",
+                    label=f"⬇️ {t('download_csv')}",
                     data=csv_data,
                     file_name=f"KKCG_Forecast_Data_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv",
                     use_container_width=True
                 )
             else:
-                st.warning("⚠️ No data to export")
+                st.warning(f"⚠️ {t('no_data_available')} to export")
     
     with export_col2:
-        if st.button("📈 Generate Report", use_container_width=True):
+        if st.button(f"📈 {t('generate_report')}", use_container_width=True):
             if not historical_data.empty:
-                st.success("📄 Forecast report generated successfully!")
+                st.success(f"📄 {t('forecast_report_generated')}")
             else:
-                st.warning("⚠️ No data for report generation")
+                st.warning(f"⚠️ {t('no_data_for_report')}")
     
     with export_col3:
-        if st.button("🔄 Refresh Data", use_container_width=True):
+        if st.button(f"🔄 {t('refresh_data')}", use_container_width=True):
             st.cache_data.clear()
-            st.success("✅ Refreshing from backend...")
+            st.success(f"✅ {t('refreshing_from_backend')}")
             st.rerun()
     
     # Footer

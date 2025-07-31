@@ -17,14 +17,21 @@ from utils.api_client import (
     check_authentication,
     logout
 )
+from utils.translations import t, create_language_selector
 
 # Page configuration
 st.set_page_config(
-    page_title="KKCG Analytics Dashboard",
+    page_title="🍛 KKCG Analytics Dashboard",
     page_icon="🍛",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Add language selector to sidebar
+with st.sidebar:
+    st.markdown("---")
+    create_language_selector()
+    st.markdown("---")
 
 # Enhanced Custom CSS with improved card layouts
 st.markdown("""
@@ -436,7 +443,7 @@ def load_dashboard_data():
 def create_summary_metrics(df):
     """Create enhanced summary metrics with better cards"""
     if df.empty:
-        st.info("📊 **No data available** - Metrics will appear after adding data")
+        st.info(f"📊 **{t('no_data_available')}** - Metrics will appear after adding data")
         return
     
     # Calculate metrics
@@ -451,26 +458,26 @@ def create_summary_metrics(df):
         <div class="metric-card">
             <div class="metric-icon">📊</div>
             <div class="metric-value">{total_demand:,}</div>
-            <div class="metric-label">Total Demand</div>
-            <div class="metric-change positive">+12% vs last week</div>
+            <div class="metric-label">{t('total_demand')}</div>
+            <div class="metric-change positive">+12% {t('vs_last_week')}</div>
         </div>
         <div class="metric-card">
             <div class="metric-icon">📅</div>
             <div class="metric-value">{avg_daily}</div>
-            <div class="metric-label">Average per Day</div>
-            <div class="metric-change neutral">Steady growth</div>
+            <div class="metric-label">{t('average_per_day')}</div>
+            <div class="metric-change neutral">{t('steady_growth')}</div>
         </div>
         <div class="metric-card">
             <div class="metric-icon">🔥</div>
             <div class="metric-value">{peak_demand}</div>
-            <div class="metric-label">Peak Demand</div>
-            <div class="metric-change positive">New record</div>
+            <div class="metric-label">{t('peak_demand')}</div>
+            <div class="metric-change positive">{t('new_record')}</div>
         </div>
         <div class="metric-card">
             <div class="metric-icon">🍽️</div>
             <div class="metric-value">{unique_dishes}</div>
-            <div class="metric-label">Menu Items</div>
-            <div class="metric-change neutral">Active dishes</div>
+            <div class="metric-label">{t('menu_items')}</div>
+            <div class="metric-change neutral">{t('active_dishes')}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -478,7 +485,7 @@ def create_summary_metrics(df):
 def create_demand_chart(df):
     """Create an enhanced demand visualization"""
     if df.empty or 'date' not in df.columns:
-        st.info("📈 **Chart requires data** - Visualization will appear after adding data")
+        st.info(f"📈 **{t('chart_requires_data')}**")
         return
     
     # Aggregate data by date
@@ -490,8 +497,8 @@ def create_demand_chart(df):
             daily_demand, 
             x='date', 
             y='predicted_demand',
-            title="Daily Demand Trends (Live Backend Data)",
-            labels={'predicted_demand': 'Demand', 'date': 'Date'}
+            title=f"{t('realtime_demand_analytics')} (Live Backend Data)",
+            labels={'predicted_demand': t('total_demand'), 'date': t('date_range')}
         )
         
         # Enhanced styling
@@ -519,11 +526,11 @@ def main():
     """Enhanced main dashboard with improved layout and UX"""
     
     # Header
-    st.markdown("""
+    st.markdown(f"""
     <div class="main-header">
-        <h1 class="main-title">🍛 KKCG Analytics Dashboard</h1>
-        <p class="main-subtitle">AI-Powered Restaurant Analytics for Kodi Kura Chitti Gaare</p>
-        <p style="color: #BDC3C7; font-size: 1rem; margin-top: 1rem; position: relative; z-index: 1;">Live Backend Integration • Real-time Data • Professional Analytics</p>
+        <h1 class="main-title">🍛 {t('app_title')}</h1>
+        <p class="main-subtitle">{t('app_subtitle')}</p>
+        <p style="color: #BDC3C7; font-size: 1rem; margin-top: 1rem; position: relative; z-index: 1;">{t('app_description')}</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -535,13 +542,13 @@ def main():
     
     with col2:
         if check_authentication():
-            st.success(f"👤 **Welcome back, {st.session_state.get('username', 'User')}!**")
+            st.success(f"👤 **{t('welcome_back')}, {st.session_state.get('username', 'User')}!**")
             col2a, col2b = st.columns(2)
             with col2a:
-                if st.button("🚪 Logout", use_container_width=True):
+                if st.button(f"🚪 {t('logout')}", use_container_width=True):
                     logout()
             with col2b:
-                if st.button("⚙️ Settings", use_container_width=True, type="secondary"):
+                if st.button(f"⚙️ {t('settings')}", use_container_width=True, type="secondary"):
                     st.switch_page("pages/Settings.py")
         else:
             show_login_form()
@@ -558,31 +565,30 @@ def main():
     st.markdown("---")
     
     # Load and display data
-    with st.spinner("🔄 Loading live data from backend..."):
+    with st.spinner(f"🔄 {t('loading_data')}"):
         df = load_dashboard_data()
     
     if not df.empty:
         # Performance Metrics
-        st.markdown("### 📊 Live Performance Dashboard")
+        st.markdown(f"### 📊 {t('live_performance_dashboard')}")
         create_summary_metrics(df)
         
         # Analytics Chart
-        st.markdown("### 📈 Real-time Demand Analytics")
+        st.markdown(f"### 📈 {t('realtime_demand_analytics')}")
         create_demand_chart(df)
         
         st.markdown("---")
     
     # Enhanced Analytics Tools Section
-    st.markdown("### 🚀 Analytics Tools")
+    st.markdown(f"### 🚀 {t('analytics_tools')}")
     
-    st.markdown("""
+    st.markdown(f"""
     <div class="tools-container">
         <div class="tool-card">
             <div class="tool-icon">📊</div>
-            <h3 class="tool-title">AI Demand Forecasting</h3>
+            <h3 class="tool-title">{t('ai_demand_forecasting')}</h3>
             <p class="tool-description">
-                Advanced machine learning forecasting engine with real backend data. 
-                Features seasonal analysis, confidence intervals, and AI-powered insights for optimal inventory planning.
+                {t('forecasting_description')}
             </p>
             <div class="tool-features">
                 <span class="feature-tag">🔮 ML Powered</span>
@@ -593,10 +599,9 @@ def main():
         </div>
         <div class="tool-card">
             <div class="tool-icon">🔥</div>
-            <h3 class="tool-title">Interactive Heatmap Analytics</h3>
+            <h3 class="tool-title">{t('interactive_heatmap_analytics')}</h3>
             <p class="tool-description">
-                Dynamic heatmap visualization with live backend data integration. 
-                Real-time performance analysis across dishes and outlets with AI-generated business insights.
+                {t('heatmap_description')}
             </p>
             <div class="tool-features">
                 <span class="feature-tag">🎨 Interactive</span>
@@ -611,70 +616,70 @@ def main():
     # Tool buttons
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🚀 Launch Forecasting Tool", use_container_width=True, type="primary"):
+        if st.button(f"🚀 {t('launch')} {t('forecasting_tool')}", use_container_width=True, type="primary"):
             st.switch_page("pages/Forecasting_Tool.py")
     
     with col2:
-        if st.button("🔥 Launch Heatmap Analytics", use_container_width=True, type="primary"):
+        if st.button(f"🔥 {t('launch')} {t('heatmap_analytics')}", use_container_width=True, type="primary"):
             st.switch_page("pages/Heatmap_Comparison.py")
     
     st.markdown("---")
     
     # Benefits Section
-    st.markdown("### 💡 Platform Benefits")
+    st.markdown(f"### 💡 {t('platform_benefits')}")
     
-    st.markdown("""
+    st.markdown(f"""
     <div class="benefits-container">
         <div class="benefit-card">
             <div class="benefit-icon">📈</div>
-            <h4 class="benefit-title">Boost Revenue</h4>
-            <p class="benefit-description">Increase sales by 15-25% with optimized inventory and demand forecasting</p>
+            <h4 class="benefit-title">{t('boost_revenue')}</h4>
+            <p class="benefit-description">{t('boost_revenue_desc')}</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-icon">🎯</div>
-            <h4 class="benefit-title">Reduce Waste</h4>
-            <p class="benefit-description">Cut food waste by 30% through accurate demand predictions and smart planning</p>
+            <h4 class="benefit-title">{t('reduce_waste')}</h4>
+            <p class="benefit-description">{t('reduce_waste_desc')}</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-icon">⚡</div>
-            <h4 class="benefit-title">Save Time</h4>
-            <p class="benefit-description">Automate 80% of planning tasks with AI-powered insights and recommendations</p>
+            <h4 class="benefit-title">{t('save_time')}</h4>
+            <p class="benefit-description">{t('save_time_desc')}</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-icon">💰</div>
-            <h4 class="benefit-title">Cost Control</h4>
-            <p class="benefit-description">Lower operational costs by 20% with efficient resource allocation</p>
+            <h4 class="benefit-title">{t('cost_control')}</h4>
+            <p class="benefit-description">{t('cost_control_desc')}</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-icon">🔮</div>
-            <h4 class="benefit-title">Future Ready</h4>
-            <p class="benefit-description">Stay ahead with 7-day forecasts and seasonal trend analysis</p>
+            <h4 class="benefit-title">{t('future_ready')}</h4>
+            <p class="benefit-description">{t('future_ready_desc')}</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-icon">📊</div>
-            <h4 class="benefit-title">Data Driven</h4>
-            <p class="benefit-description">Make confident decisions backed by real-time analytics and insights</p>
+            <h4 class="benefit-title">{t('data_driven')}</h4>
+            <p class="benefit-description">{t('data_driven_desc')}</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-icon">🏆</div>
-            <h4 class="benefit-title">Competitive Edge</h4>
-            <p class="benefit-description">Outperform competitors with advanced ML-powered business intelligence</p>
+            <h4 class="benefit-title">{t('competitive_edge')}</h4>
+            <p class="benefit-description">{t('competitive_edge_desc')}</p>
         </div>
         <div class="benefit-card">
             <div class="benefit-icon">📱</div>
-            <h4 class="benefit-title">Easy to Use</h4>
-            <p class="benefit-description">User-friendly interface that requires no technical expertise to operate</p>
+            <h4 class="benefit-title">{t('easy_to_use')}</h4>
+            <p class="benefit-description">{t('easy_to_use_desc')}</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     # Quick Actions Section
-    st.markdown("### ⚡ Quick Actions")
+    st.markdown(f"### ⚡ {t('quick_actions')}")
     
     action_col1, action_col2, action_col3, action_col4 = st.columns(4)
     
     with action_col1:
-        if st.button("🌱 Seed Database", help="Add sample data to the backend database", use_container_width=True):
+        if st.button(f"🌱 {t('seed_database')}", help="Add sample data to the backend database", use_container_width=True):
             client = get_api_client()
             with st.spinner("Seeding database with sample data..."):
                 result = client.seed_database()
@@ -686,9 +691,9 @@ def main():
                 st.error(f"❌ {result['error']}")
     
     with action_col2:
-        if st.button("🔄 Refresh Data", help="Clear cache and reload from backend", use_container_width=True):
+        if st.button(f"🔄 {t('refresh_data')}", help="Clear cache and reload from backend", use_container_width=True):
             st.cache_data.clear()
-            st.success("✅ Data cache cleared! Reloading from backend...")
+            st.success(f"✅ Data cache cleared! {t('refreshing_from_backend')}")
             st.rerun()
     
     with action_col3:
@@ -697,7 +702,7 @@ def main():
             st.success(f"**API Documentation**: [Open Live Docs]({client.base_url}/docs)")
     
     with action_col4:
-        if st.button("⚙️ Settings", help="Open system settings and configuration", use_container_width=True):
+        if st.button(f"⚙️ {t('settings')}", help="Open system settings and configuration", use_container_width=True):
             st.switch_page("pages/Settings.py")
     
     # Footer

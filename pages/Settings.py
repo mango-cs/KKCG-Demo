@@ -15,14 +15,21 @@ from utils.api_client import (
     check_authentication,
     logout
 )
+from utils.translations import t, create_language_selector
 
 # Page configuration
 st.set_page_config(
-    page_title="Settings - KKCG Analytics",
+    page_title="⚙️ Settings - KKCG Analytics",
     page_icon="⚙️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Add language selector to sidebar
+with st.sidebar:
+    st.markdown("---")
+    create_language_selector()
+    st.markdown("---")
 
 # Custom CSS for Settings page
 st.markdown("""
@@ -134,22 +141,22 @@ def main():
     
     # Check authentication
     if not check_authentication():
-        st.error("🔒 **Access Denied**: Please log in from the Home page to access Settings.")
-        if st.button("🏠 Go to Home Page", type="primary"):
+        st.error(f"🔒 **{t('access_denied')}**: Please log in from the Home page to access Settings.")
+        if st.button(f"🏠 {t('go_to_home')}", type="primary"):
             st.switch_page("Home.py")
         return
     
     # Header
-    st.markdown("""
+    st.markdown(f"""
     <div class="settings-header">
-        <h1 class="settings-title">⚙️ System Settings</h1>
-        <p class="settings-subtitle">Backend Configuration • API Management • System Controls</p>
+        <h1 class="settings-title">⚙️ {t('system_settings')}</h1>
+        <p class="settings-subtitle">{t('settings_subtitle')}</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Backend Status Section
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.markdown("### 🔗 Backend Connection Status")
+    st.markdown(f"### 🔗 {t('backend_connection_status')}")
     
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -164,25 +171,25 @@ def main():
             st.info(f"**{status_info['status']}** Status")
     
     with col2:
-        if st.button("🔄 Test Connection", help="Test backend connectivity", use_container_width=True):
+        if st.button(f"🔄 {t('test_connection')}", help="Test backend connectivity", use_container_width=True):
             if client.health_check():
-                st.success("✅ Connection verified!")
+                st.success(f"✅ {t('connection_verified')}!")
             else:
-                st.error("❌ Connection failed!")
+                st.error(f"❌ {t('connection_failed')}!")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
     # User Management Section
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.markdown("### 👤 User Management")
+    st.markdown(f"### 👤 {t('user_management')}")
     
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.success(f"**Logged in as:** {st.session_state.get('username', 'User')}")
-        st.info(f"**Session Started:** {st.session_state.get('login_time', 'Unknown')}")
+        st.success(f"**{t('logged_in_as')}:** {st.session_state.get('username', 'User')}")
+        st.info(f"**{t('session_started')}:** {st.session_state.get('login_time', 'Unknown')}")
     
     with col2:
-        if st.button("🚪 Logout", type="secondary", use_container_width=True):
+        if st.button(f"🚪 {t('logout')}", type="secondary", use_container_width=True):
             logout()
             st.rerun()
     
@@ -190,12 +197,12 @@ def main():
     
     # Database Management Section
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.markdown("### 🗄️ Database Management")
+    st.markdown(f"### 🗄️ {t('database_management')}")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🌱 Seed Database", help="Add sample data to the backend database", use_container_width=True):
+        if st.button(f"🌱 {t('seed_database')}", help="Add sample data to the backend database", use_container_width=True):
             client = get_api_client()
             with st.spinner("Seeding database with sample data..."):
                 result = client.seed_database()
@@ -206,9 +213,9 @@ def main():
                 st.error(f"❌ {result['error']}")
     
     with col2:
-        if st.button("🔄 Refresh Data", help="Clear cache and reload from backend", use_container_width=True):
+        if st.button(f"🔄 {t('refresh_data')}", help="Clear cache and reload from backend", use_container_width=True):
             st.cache_data.clear()
-            st.success("✅ Data cache cleared! Reloading from backend...")
+            st.success(f"✅ Data cache cleared! {t('refreshing_from_backend')}")
             st.rerun()
     
     with col3:
@@ -220,7 +227,7 @@ def main():
     
     # API Configuration Section
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.markdown("### 🌐 API Configuration")
+    st.markdown(f"### 🌐 {t('api_configuration')}")
     
     client = get_api_client()
     
@@ -229,7 +236,7 @@ def main():
     with col1:
         st.markdown(f"""
         <div class="info-card">
-            <h4 style="color: #FF6B35; margin-bottom: 1rem;">🔗 Backend Information</h4>
+            <h4 style="color: #FF6B35; margin-bottom: 1rem;">🔗 {t('backend_information')}</h4>
             <p><strong>URL:</strong> <code>{client.base_url}</code></p>
             <p><strong>Status:</strong> <span class="metric-badge">🟢 Connected</span></p>
             <p><strong>Platform:</strong> Railway.app</p>
@@ -238,9 +245,9 @@ def main():
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="info-card">
-            <h4 style="color: #FF6B35; margin-bottom: 1rem;">🛡️ Security Features</h4>
+            <h4 style="color: #FF6B35; margin-bottom: 1rem;">🛡️ {t('security_features')}</h4>
             <p>✅ JWT Authentication</p>
             <p>✅ HTTPS Encryption</p>
             <p>✅ CORS Protection</p>
@@ -279,16 +286,16 @@ def main():
     
     # System Information Section
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.markdown("### 📊 System Information")
+    st.markdown(f"### 📊 {t('system_information')}")
     
     # Feature grid
     st.markdown('<div class="feature-grid">', unsafe_allow_html=True)
     
     # Backend Features
-    st.markdown("""
+    st.markdown(f"""
     <div class="feature-card">
-        <h4 style="color: #FF6B35; margin-bottom: 1rem;">🏗️ Backend Architecture</h4>
-        <p style="color: #E8F4FD; margin-bottom: 1rem;">Production-grade infrastructure</p>
+        <h4 style="color: #FF6B35; margin-bottom: 1rem;">🏗️ {t('backend_architecture')}</h4>
+        <p style="color: #E8F4FD; margin-bottom: 1rem;">{t('production_grade_infrastructure')}</p>
         <div>
             <span class="metric-badge">FastAPI</span>
             <span class="metric-badge">Database</span>
@@ -298,10 +305,10 @@ def main():
     """, unsafe_allow_html=True)
     
     # Frontend Features
-    st.markdown("""
+    st.markdown(f"""
     <div class="feature-card">
-        <h4 style="color: #FF6B35; margin-bottom: 1rem;">🎨 Frontend Stack</h4>
-        <p style="color: #E8F4FD; margin-bottom: 1rem;">Modern web application</p>
+        <h4 style="color: #FF6B35; margin-bottom: 1rem;">🎨 {t('frontend_stack')}</h4>
+        <p style="color: #E8F4FD; margin-bottom: 1rem;">{t('modern_web_application')}</p>
         <div>
             <span class="metric-badge">Streamlit</span>
             <span class="metric-badge">Plotly</span>
@@ -311,10 +318,10 @@ def main():
     """, unsafe_allow_html=True)
     
     # Performance Features
-    st.markdown("""
+    st.markdown(f"""
     <div class="feature-card">
-        <h4 style="color: #FF6B35; margin-bottom: 1rem;">⚡ Performance</h4>
-        <p style="color: #E8F4FD; margin-bottom: 1rem;">Optimized for speed</p>
+        <h4 style="color: #FF6B35; margin-bottom: 1rem;">⚡ {t('performance')}</h4>
+        <p style="color: #E8F4FD; margin-bottom: 1rem;">{t('optimized_for_speed')}</p>
         <div>
             <span class="metric-badge">Caching</span>
             <span class="metric-badge">CDN</span>
