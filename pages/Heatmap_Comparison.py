@@ -843,7 +843,7 @@ def main():
     <div style="text-align: center; padding: 2rem 0; color: #666;">
         <h4 style="color: #FF6B35; margin-bottom: 1rem;">🔥 Interactive Heatmap Analytics Engine</h4>
         <p style="margin: 0;">Real-time performance visualization with AI-powered business insights</p>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Powered by KKCG Analytics Platform • Live Backend Integration • Advanced Analytics</p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Powered by KKCG Analytics Platform • Railway Database • Advanced Analytics</p>
     </div>
     """, unsafe_allow_html=True)
 

@@ -49,7 +49,7 @@ class KKCGAPIClient:
                 if db_status == "connected":
                     return {
                         "status": "🟢 Live",
-                        "message": "PostgreSQL",
+                        "message": "Database",
                         "color": "green"
                     }
                 else:
