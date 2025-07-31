@@ -457,9 +457,9 @@ def create_performance_dashboard(outlet_perf, dish_perf):
             </div>
             """, unsafe_allow_html=True)
             
-            for idx, row in outlet_perf.head(5).iterrows():
-                performance_class = "high-performance" if idx < 2 else "medium-performance" if idx < 4 else "low-performance"
-                rank = idx + 1
+            for position, (idx, row) in enumerate(outlet_perf.head(5).iterrows()):
+                performance_class = "high-performance" if position < 2 else "medium-performance" if position < 4 else "low-performance"
+                rank = position + 1
                 
                 st.markdown(f"""
                 <div class="performance-item">
@@ -476,9 +476,9 @@ def create_performance_dashboard(outlet_perf, dish_perf):
             </div>
             """, unsafe_allow_html=True)
             
-            for idx, row in dish_perf.head(5).iterrows():
-                performance_class = "high-performance" if idx < 2 else "medium-performance" if idx < 4 else "low-performance"
-                rank = idx + 1
+            for position, (idx, row) in enumerate(dish_perf.head(5).iterrows()):
+                performance_class = "high-performance" if position < 2 else "medium-performance" if position < 4 else "low-performance"
+                rank = position + 1
                 
                 st.markdown(f"""
                 <div class="performance-item">
@@ -531,8 +531,6 @@ def create_ai_recommendations(df):
         st.info("🤖 **AI recommendations will appear when data is available**")
         return
     
-    st.markdown("### 🤖 AI-Powered Business Recommendations")
-    
     # Calculate some insights
     total_demand = df['predicted_demand'].sum()
     top_dish = df.groupby('dish')['predicted_demand'].sum().idxmax()
@@ -563,6 +561,7 @@ def create_ai_recommendations(df):
     
     st.markdown("""
     <div class="recommendations-section">
+        <h3 style="color: #FF6B35; margin-bottom: 1.5rem; text-align: center; font-family: 'Poppins', sans-serif;">🤖 AI-Powered Business Recommendations</h3>
     """, unsafe_allow_html=True)
     
     for rec in recommendations:
