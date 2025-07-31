@@ -172,11 +172,11 @@ def main():
         status_info = client.get_connection_status()
         
         if status_info["color"] == "green":
-            st.success(f"**{status_info['status']}** Database")
+            st.success(f"**{status_info['status']}**")
         elif status_info["color"] == "orange":
-            st.warning(f"**{status_info['status']}** Mode")
+            st.warning(f"**{status_info['status']}**")
         else:
-            st.info(f"**{status_info['status']}** Status")
+            st.info(f"**{status_info['status']}**")
     
     with col2:
         if st.button(f"🔄 {t('test_connection')}", help="Test backend connectivity", use_container_width=True):
@@ -248,7 +248,7 @@ def main():
             <p><strong>URL:</strong> <code>{client.base_url}</code></p>
             <p><strong>Status:</strong> <span class="metric-badge">🟢 Connected</span></p>
             <p><strong>Platform:</strong> Railway.app</p>
-            <p><strong>Database:</strong> Production</p>
+            <p><strong>Environment:</strong> Production</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -306,7 +306,7 @@ def main():
         <p style="color: #E8F4FD; margin-bottom: 1rem;">{t('production_grade_infrastructure')}</p>
         <div>
             <span class="metric-badge">FastAPI</span>
-            <span class="metric-badge">Database</span>
+            <span class="metric-badge">Storage</span>
             <span class="metric-badge">Railway</span>
         </div>
     </div>
@@ -360,7 +360,7 @@ def main():
         st.markdown(f"""
         **🔧 Technical Specifications**
         - **Backend API:** 9 endpoints
-        - **Database:** Production on Railway
+        - **Storage:** Production on Railway
         - **Authentication:** JWT tokens
         - **Real-time Updates:** ✅ Enabled
         """)

@@ -711,7 +711,7 @@ def main():
     <div style="text-align: center; padding: 2rem 0; color: #666;">
         <h4 style="color: #FF6B35; margin-bottom: 1rem;">🍛 KKCG Analytics Platform</h4>
         <p style="margin: 0;">Production-grade restaurant analytics with live backend integration</p>
-        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Powered by Streamlit • FastAPI • Database • Railway Cloud</p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Powered by Streamlit • FastAPI • Railway Cloud</p>
     </div>
     """, unsafe_allow_html=True)
 
