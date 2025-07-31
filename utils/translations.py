@@ -171,6 +171,25 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "modern_web_application": "Modern web application",
         "optimized_for_speed": "Optimized for speed",
         
+        # Application Information
+        "kkcg_analytics_platform": "KKCG Analytics Platform",
+        "version": "Version",
+        "environment": "Environment",
+        "deployment": "Deployment",
+        "last_updated": "Last Updated",
+        "technical_specifications": "Technical Specifications",
+        "backend_api": "Backend API",
+        "database": "Database",
+        "authentication": "Authentication",
+        "realtime_updates": "Real-time Updates",
+        "production": "Production",
+        "streamlit_cloud": "Streamlit Cloud",
+        "december_2024": "December 2024",
+        "endpoints": "endpoints",
+        "production_on_railway": "Production on Railway",
+        "jwt_tokens": "JWT tokens",
+        "enabled": "Enabled",
+        
         # ==== ERROR MESSAGES & STATUS ====
         "no_data_available": "No data available",
         "loading_data": "Loading live data from backend...",
@@ -357,7 +376,26 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         
         "production_grade_infrastructure": "ప్రొడక్షన్-గ్రేడ్ ఇన్‌ఫ్రాస్ట్రక్చర్",
         "modern_web_application": "ఆధునిక వెబ్ అప్లికేషన్",
-        "optimized_for_speed": "గतి కోసం అనుకూలించబడింది",
+        "optimized_for_speed": "గతి కోసం అనుకూలించబడింది",
+        
+        # Application Information
+        "kkcg_analytics_platform": "KKCG అనలిటిక్స్ ప్లాట్‌ఫారమ్",
+        "version": "వెర్షన్",
+        "environment": "వాతావరణం",
+        "deployment": "విన్యాసం",
+        "last_updated": "చివరిగా అప్‌డేట్ చేయబడింది",
+        "technical_specifications": "సాంకేతిక వివరాలు",
+        "backend_api": "బ్యాకెండ్ API",
+        "database": "డేటాబేస్",
+        "authentication": "ప్రమాణీకరణ",
+        "realtime_updates": "రియల్-టైమ్ అప్‌డేట్లు",
+        "production": "ప్రొడక్షన్",
+        "streamlit_cloud": "స్ట్రీమ్‌లిట్ క్లౌడ్",
+        "december_2024": "డిసెంబర్ 2024",
+        "endpoints": "ఎండ్‌పాయింట్లు",
+        "production_on_railway": "రైల్వేలో ప్రొడక్షన్",
+        "jwt_tokens": "JWT టోకెన్లు",
+        "enabled": "ప్రారంభించబడింది",
         
         # ==== ERROR MESSAGES & STATUS ====
         "no_data_available": "డేటా అందుబాటులో లేదు",
@@ -546,6 +584,25 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "production_grade_infrastructure": "प्रोडक्शन-ग्रेड इन्फ्रास्ट्रक्चर",
         "modern_web_application": "आधुनिक वेब एप्लिकेशन",
         "optimized_for_speed": "गति के लिए अनुकूलित",
+        
+        # Application Information
+        "kkcg_analytics_platform": "KKCG एनालिटिक्स प्लाट్‌फాरम్",
+        "version": "वेर्षण",
+        "environment": "वातावरण",
+        "deployment": "विन्यास",
+        "last_updated": "चिवरिगाग अप‌डेट్ चेयबड़िंदि",
+        "technical_specifications": "सांकेतिक विवराल",
+        "backend_api": "ब్याकెंड API",
+        "database": "डेटाबेस",
+        "authentication": "प्रमाणीकरण",
+        "realtime_updates": "रियल-टైम్ अप‌डेट్लु",
+        "production": "प्रोडक्शन",
+        "streamlit_cloud": "स్ट్रీम్‌लिट్ क्लौड్",
+        "december_2024": "डिसेंबर 2024",
+        "endpoints": "एंड్‌पायिंट्लु",
+        "production_on_railway": "रैल్वेलो प्रोडक्शन",
+        "jwt_tokens": "JWT टोकेंलु",
+        "enabled": "प्रारंभिंचबड़िंदि",
         
         # ==== ERROR MESSAGES & STATUS ====
         "no_data_available": "कोई डेटा उपलब्ध नहीं",

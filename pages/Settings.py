@@ -68,6 +68,9 @@ st.markdown("""
         margin: 1.5rem 0;
         border: 1px solid rgba(255,255,255,0.1);
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        width: 100%;
+        display: block;
+        clear: both;
     }
     
     .settings-section h3 {
@@ -101,6 +104,8 @@ st.markdown("""
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 1.5rem;
         margin: 1.5rem 0;
+        width: 100%;
+        clear: both;
     }
     
     .feature-card {
@@ -110,6 +115,9 @@ st.markdown("""
         border: 1px solid rgba(255,255,255,0.1);
         transition: all 0.3s ease;
         text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+        display: block;
     }
     
     .feature-card:hover {
@@ -259,7 +267,7 @@ def main():
     
     # API Endpoints Section
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.markdown("### 📋 Available API Endpoints")
+    st.markdown(f"### 📋 {t('available_api_endpoints')}")
     
     endpoints = [
         ("GET", "/health", "Backend health check"),
@@ -335,12 +343,12 @@ def main():
     
     # Application Information
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
-    st.markdown("### 📱 Application Information")
+    st.markdown(f"### 📱 {t('application_information')}")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("""
+        st.markdown(f"""
         **🏢 KKCG Analytics Platform**
         - **Version:** 2.0.0
         - **Environment:** Production
@@ -349,7 +357,7 @@ def main():
         """)
     
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         **🔧 Technical Specifications**
         - **Backend API:** 9 endpoints
         - **Database:** Production on Railway
