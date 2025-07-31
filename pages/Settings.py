@@ -150,7 +150,26 @@ def main():
     # Backend Status Section
     st.markdown('<div class="settings-section">', unsafe_allow_html=True)
     st.markdown("### 🔗 Backend Connection Status")
-    show_backend_status()
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        client = get_api_client()
+        status_info = client.get_connection_status()
+        
+        if status_info["color"] == "green":
+            st.success(f"**{status_info['status']}** Database")
+        elif status_info["color"] == "orange":
+            st.warning(f"**{status_info['status']}** Mode")
+        else:
+            st.info(f"**{status_info['status']}** Status")
+    
+    with col2:
+        if st.button("🔄 Test Connection", help="Test backend connectivity", use_container_width=True):
+            if client.health_check():
+                st.success("✅ Connection verified!")
+            else:
+                st.error("❌ Connection failed!")
+    
     st.markdown('</div>', unsafe_allow_html=True)
     
     # User Management Section
@@ -214,7 +233,7 @@ def main():
             <p><strong>URL:</strong> <code>{client.base_url}</code></p>
             <p><strong>Status:</strong> <span class="metric-badge">🟢 Connected</span></p>
             <p><strong>Platform:</strong> Railway.app</p>
-            <p><strong>Database:</strong> PostgreSQL</p>
+            <p><strong>Database:</strong> Production</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -272,7 +291,7 @@ def main():
         <p style="color: #E8F4FD; margin-bottom: 1rem;">Production-grade infrastructure</p>
         <div>
             <span class="metric-badge">FastAPI</span>
-            <span class="metric-badge">PostgreSQL</span>
+            <span class="metric-badge">Database</span>
             <span class="metric-badge">Railway</span>
         </div>
     </div>
@@ -326,7 +345,7 @@ def main():
         st.markdown("""
         **🔧 Technical Specifications**
         - **Backend API:** 9 endpoints
-        - **Database:** PostgreSQL on Railway
+        - **Database:** Production on Railway
         - **Authentication:** JWT tokens
         - **Real-time Updates:** ✅ Enabled
         """)
