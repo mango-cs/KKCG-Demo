@@ -20,21 +20,25 @@ from utils.api_client import (
 
 # Page configuration
 st.set_page_config(
-    page_title="KKCG Heatmap Analytics",
+    page_title="🔥 Heatmap Analytics | KKCG",
     page_icon="🔥",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS with professional styling
+# Enhanced CSS matching the design system
 st.markdown("""
 <style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+    
     .main-header {
-        background: linear-gradient(90deg, #FF6B35 0%, #F7931E 100%);
-        padding: 2rem;
-        border-radius: 15px;
         text-align: center;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        border-radius: 20px;
         margin-bottom: 2rem;
-        color: white;
+        box-shadow: 0 8px 32px rgba(255,107,53,0.2);
         position: relative;
         overflow: hidden;
     }
@@ -42,90 +46,321 @@ st.markdown("""
     .main-header::before {
         content: '';
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-        animation: shine 3s infinite;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="white" stop-opacity=".1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+        background-size: 100% 100%;
     }
     
-    @keyframes shine {
-        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
-    
-    .insight-card {
-        background: linear-gradient(145deg, #2c3e50, #34495e);
-        border-radius: 15px;
-        padding: 1.5rem;
+    .main-title {
+        font-size: 3.2rem;
+        font-weight: 700;
         color: white;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        font-family: 'Poppins', sans-serif;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .main-subtitle {
+        font-size: 1.3rem;
+        color: rgba(255,255,255,0.9);
+        font-weight: 300;
+        font-family: 'Inter', sans-serif;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Enhanced control panel */
+    .control-panel {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem 0;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .control-panel h3 {
+        color: #FF6B35;
+        margin-bottom: 1.5rem;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+    }
+    
+    /* Enhanced metrics container */
+    .metrics-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .metric-card {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,107,53,0.1), transparent);
+        transition: left 0.6s ease;
+    }
+    
+    .metric-card:hover::before {
+        left: 100%;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(255,107,53,0.2);
+        border: 1px solid rgba(255,107,53,0.4);
+    }
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #FF6B35;
+        margin-bottom: 0.5rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .metric-label {
+        font-size: 1rem;
+        color: #BDC3C7;
+        font-weight: 400;
+    }
+    
+    /* Enhanced insight card */
+    .insight-card {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 20px;
+        padding: 2rem;
         border: 1px solid rgba(255,255,255,0.1);
         margin: 1rem 0;
         transition: all 0.3s ease;
-        height: 100%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
     
     .insight-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 15px 40px rgba(255,107,53,0.2);
         border: 1px solid rgba(255,107,53,0.3);
     }
     
-    .metric-highlight {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 1.5rem;
-        color: white;
+    .insight-card h4 {
+        color: #FF6B35;
+        margin-bottom: 1rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .insight-card p {
+        color: #E8F4FD;
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    /* Performance indicators */
+    .performance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .performance-card {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .performance-card h4 {
+        color: #FF6B35;
+        margin-bottom: 1.5rem;
         text-align: center;
-        margin: 1rem 0;
-        border: 2px solid rgba(255,255,255,0.2);
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .performance-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .performance-item:last-child {
+        border-bottom: none;
     }
     
     .performance-indicator {
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
+        padding: 0.4rem 1rem;
+        border-radius: 15px;
         font-weight: 600;
         text-align: center;
-        display: inline-block;
-        margin: 0.25rem;
+        font-size: 0.8rem;
     }
     
-    .high-performance { background: #27AE60; color: white; }
-    .medium-performance { background: #F39C12; color: white; }
-    .low-performance { background: #E74C3C; color: white; }
+    .high-performance { 
+        background: linear-gradient(145deg, #27AE60, #2ECC71); 
+        color: white; 
+    }
+    .medium-performance { 
+        background: linear-gradient(145deg, #F39C12, #F1C40F); 
+        color: white; 
+    }
+    .low-performance { 
+        background: linear-gradient(145deg, #E74C3C, #EC7063); 
+        color: white; 
+    }
+    
+    /* Summary stats section */
+    .stats-highlight {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin: 2rem 0;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .stats-highlight h3 {
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .stat-item {
+        padding: 1rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    /* Recommendations section */
+    .recommendations-section {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem 0;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .recommendation-item {
+        background: rgba(255,107,53,0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-left: 4px solid #FF6B35;
+        border: 1px solid rgba(255,107,53,0.2);
+    }
+    
+    .recommendation-item h4 {
+        color: #FF6B35;
+        margin-bottom: 0.8rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .recommendation-item p {
+        color: #E8F4FD;
+        line-height: 1.6;
+        margin: 0;
+    }
     
     /* Hide Streamlit elements */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     .stDeployButton {display: none;}
+    .stApp > header {visibility: hidden;}
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .main-title { font-size: 2.5rem; }
+        .main-subtitle { font-size: 1.1rem; }
+        .metrics-container { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .performance-grid { grid-template-columns: 1fr; }
+        .control-panel { padding: 1.5rem; }
+    }
 </style>
 """, unsafe_allow_html=True)
 
 @st.cache_data
 def load_heatmap_data():
-    """Load data for heatmap analysis from backend API ONLY"""
-    client = get_api_client()
-    
+    """Load data for heatmap analysis from backend API"""
     try:
-        df = client.get_demand_data()
-        
-        if df.empty:
-            st.warning("⚠️ **No data available**: Backend returned empty dataset for heatmap analysis")
-            st.info("💡 **Tip**: Seed the database with sample data to generate heatmaps")
+        client = get_api_client()
+        if client.check_backend_health():
+            df = client.get_demand_data()
+            if not df.empty:
+                # Ensure required columns exist and are properly formatted
+                required_cols = ['date', 'dish', 'outlet', 'predicted_demand']
+                for col in required_cols:
+                    if col not in df.columns:
+                        if col == 'dish' and 'dish_name' in df.columns:
+                            df['dish'] = df['dish_name']
+                        elif col == 'outlet' and 'outlet_name' in df.columns:
+                            df['outlet'] = df['outlet_name']
+                
+                if 'date' in df.columns:
+                    df['date'] = pd.to_datetime(df['date'])
+                
+                return df
+            else:
+                return pd.DataFrame()
+        else:
             return pd.DataFrame()
-        
-        return df
-        
     except Exception as e:
-        st.error(f"❌ **Heatmap Data Error**: {str(e)}")
-        st.stop()
+        st.error(f"❌ **Heatmap data error**: {str(e)}")
+        return pd.DataFrame()
 
 def create_interactive_heatmap(df, metric='predicted_demand', title="Demand Heatmap"):
-    """Create an interactive heatmap visualization from backend data"""
+    """Create an enhanced interactive heatmap visualization"""
     
     if df.empty:
-        st.info("🔥 **No heatmap data available**: Please seed the database to generate heatmaps")
+        st.info("🔥 **No heatmap data available** - Data needed for visualization")
         return None
     
     # Create pivot table for heatmap
@@ -145,17 +380,17 @@ def create_interactive_heatmap(df, metric='predicted_demand', title="Demand Heat
         st.warning(f"⚠️ **No pivot data**: Unable to create heatmap from current data selection")
         return None
     
-    # Create heatmap with dark professional colors - custom color scheme for better differentiation
+    # Create enhanced heatmap with Plasma color scheme
     fig = px.imshow(
         pivot_data.values,
         x=pivot_data.columns,
         y=pivot_data.index,
         aspect='auto',
-        color_continuous_scale='Plasma',  # Dark, high-contrast color scheme perfect for dark themes
+        color_continuous_scale='Plasma',
         title=f"{title} (Live Backend Data)"
     )
     
-    # Customize layout for dark theme with improved aesthetics
+    # Enhanced styling for better UX
     fig.update_layout(
         title=dict(
             text=f"{title} (Live Backend Data)",
@@ -164,203 +399,170 @@ def create_interactive_heatmap(df, metric='predicted_demand', title="Demand Heat
         ),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white', size=12),
+        font=dict(color='#E8F4FD', size=12, family='Inter'),
         height=600,
         xaxis_title="Outlets",
         yaxis_title="Dishes",
         coloraxis_colorbar=dict(
-            title=dict(text=metric.replace('_', ' ').title(), font=dict(color='white')),
-            tickfont=dict(color='white'),
-            bgcolor='rgba(30,30,30,0.8)',
+            title=dict(text=metric.replace('_', ' ').title(), font=dict(color='#E8F4FD')),
+            tickfont=dict(color='#E8F4FD'),
+            bgcolor='rgba(42,42,62,0.8)',
             bordercolor='rgba(255,255,255,0.2)',
             borderwidth=1
         )
     )
     
-    # Add custom hover template
+    # Add enhanced hover template
     fig.update_traces(
-        hovertemplate='<b>%{y}</b> at <b>%{x}</b><br>Demand: %{z:.1f}<extra></extra>'
+        hovertemplate='<b>%{y}</b> at <b>%{x}</b><br>' +
+                     f'{metric.replace("_", " ").title()}: %{{z:.1f}}<extra></extra>'
     )
     
     return fig
 
 def create_comparison_metrics(df):
-    """Create comparison metrics for outlets and dishes from backend data"""
-    
+    """Create performance comparison metrics"""
     if df.empty:
-        st.info("📊 **No metrics data**: Please seed the database to see performance metrics")
-        return None, None
+        return pd.DataFrame(), pd.DataFrame()
     
     # Outlet performance
-    if 'outlet' in df.columns and 'predicted_demand' in df.columns:
-        outlet_performance = df.groupby('outlet')['predicted_demand'].agg(['mean', 'sum', 'std']).round(2)
-        outlet_performance.columns = ['Avg Demand', 'Total Demand', 'Variability']
-        outlet_performance = outlet_performance.sort_values('Total Demand', ascending=False)
-        
-        # Dish performance
-        dish_performance = df.groupby('dish')['predicted_demand'].agg(['mean', 'sum', 'std']).round(2)
-        dish_performance.columns = ['Avg Demand', 'Total Demand', 'Variability']
-        dish_performance = dish_performance.sort_values('Total Demand', ascending=False)
-        
-        return outlet_performance, dish_performance
-    else:
-        st.error("❌ **Missing columns**: Backend data must contain 'outlet' and 'predicted_demand' columns")
-        return None, None
+    outlet_performance = df.groupby('outlet').agg({
+        'predicted_demand': ['sum', 'mean', 'count']
+    }).round(2)
+    outlet_performance.columns = ['Total_Demand', 'Avg_Demand', 'Records']
+    outlet_performance = outlet_performance.reset_index().sort_values('Total_Demand', ascending=False)
+    
+    # Dish performance
+    dish_performance = df.groupby('dish').agg({
+        'predicted_demand': ['sum', 'mean', 'count']
+    }).round(2)
+    dish_performance.columns = ['Total_Demand', 'Avg_Demand', 'Records']
+    dish_performance = dish_performance.reset_index().sort_values('Total_Demand', ascending=False)
+    
+    return outlet_performance, dish_performance
 
 def create_trend_analysis(df):
-    """Create trend analysis charts from backend data"""
-    
-    if df.empty:
-        st.info("📈 **No trend data**: Please seed the database to see trend analysis")
+    """Create enhanced trend analysis visualization"""
+    if df.empty or 'date' not in df.columns:
         return None
     
-    if 'date' not in df.columns:
-        st.warning("⚠️ **No date data**: Backend data must contain 'date' column for trend analysis")
+    # Daily trend
+    daily_trend = df.groupby('date')['predicted_demand'].sum().reset_index()
+    
+    if daily_trend.empty:
         return None
     
-    # Daily trends
-    daily_trends = df.groupby('date')['predicted_demand'].sum().reset_index()
-    
-    if daily_trends.empty:
-        st.warning("⚠️ **No trend data**: Unable to aggregate data by date")
-        return None
-    
+    # Create trend chart
     fig = px.line(
-        daily_trends,
+        daily_trend,
         x='date',
         y='predicted_demand',
-        title='📈 Daily Demand Trends (Live Backend Data)',
-        labels={'predicted_demand': 'Total Demand', 'date': 'Date'}
+        title='Daily Demand Trends',
+        markers=True
+    )
+    
+    # Enhanced styling
+    fig.update_traces(
+        line=dict(color='#FF6B35', width=3),
+        marker=dict(size=8, color='#FF6B35', line=dict(width=2, color='white'))
     )
     
     fig.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font_color='white',
-        title_font_size=20,
-        title_font_color='#FF6B35'
+        font=dict(color='#E8F4FD', family='Inter'),
+        title=dict(font=dict(size=18, color='#FF6B35')),
+        xaxis=dict(gridcolor='rgba(255,255,255,0.1)', showgrid=True),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.1)', showgrid=True),
+        height=400
     )
-    
-    fig.update_traces(line_color='#FF6B35', line_width=3)
     
     return fig
 
-def create_performance_dashboard(outlet_perf, dish_perf):
-    """Create performance dashboard with rankings from backend data"""
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### 🏢 Outlet Performance Ranking (Live Data)")
-        
-        if outlet_perf is not None and not outlet_perf.empty:
-            for i, (outlet, data) in enumerate(outlet_perf.head(5).iterrows()):
-                rank_icon = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][i]
-                performance_class = "high-performance" if i < 2 else "medium-performance" if i < 4 else "low-performance"
-                
-                st.markdown(f"""
-                <div class="insight-card">
-                    <h4>{rank_icon} {outlet}</h4>
-                    <p><strong>Total Demand:</strong> {data['Total Demand']:,.0f}</p>
-                    <p><strong>Avg Daily:</strong> {data['Avg Demand']:.1f}</p>
-                    <span class="performance-indicator {performance_class}">
-                        {'Top Performer' if i < 2 else 'Good' if i < 4 else 'Needs Attention'}
-                    </span>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.info("📊 **No outlet data**: Please seed the database to see outlet performance")
-    
-    with col2:
-        st.markdown("#### 🍽️ Dish Performance Ranking (Live Data)")
-        
-        if dish_perf is not None and not dish_perf.empty:
-            for i, (dish, data) in enumerate(dish_perf.head(5).iterrows()):
-                rank_icon = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"][i]
-                performance_class = "high-performance" if i < 2 else "medium-performance" if i < 4 else "low-performance"
-                
-                st.markdown(f"""
-                <div class="insight-card">
-                    <h4>{rank_icon} {dish}</h4>
-                    <p><strong>Total Demand:</strong> {data['Total Demand']:,.0f}</p>
-                    <p><strong>Avg Daily:</strong> {data['Avg Demand']:.1f}</p>
-                    <span class="performance-indicator {performance_class}">
-                        {'Best Seller' if i < 2 else 'Popular' if i < 4 else 'Low Demand'}
-                    </span>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.info("🍽️ **No dish data**: Please seed the database to see dish performance")
-
 def create_ai_recommendations(df):
-    """Generate AI-powered business recommendations from backend data"""
-    
-    st.markdown("#### 🤖 AI-Powered Business Insights (Live Data)")
-    
+    """Create AI-powered recommendations section"""
     if df.empty:
-        st.info("🤖 **No data for AI analysis**: Please seed the database to generate insights")
+        st.info("🤖 **AI recommendations will appear when data is available**")
         return
     
-    # Generate insights based on actual data
-    total_records = len(df)
-    unique_dishes = df['dish'].nunique() if 'dish' in df.columns else 0
-    unique_outlets = df['outlet'].nunique() if 'outlet' in df.columns else 0
-    avg_demand = df['predicted_demand'].mean() if 'predicted_demand' in df.columns else 0
+    st.markdown("### 🤖 AI-Powered Business Recommendations")
+    
+    # Calculate some insights
+    total_demand = df['predicted_demand'].sum()
+    top_dish = df.groupby('dish')['predicted_demand'].sum().idxmax()
+    top_outlet = df.groupby('outlet')['predicted_demand'].sum().idxmax()
     
     recommendations = [
         {
-            "icon": "📊",
-            "title": "Backend Data Analysis",
-            "insight": f"Processing {total_records:,} live records across {unique_outlets} outlets and {unique_dishes} dishes",
-            "action": f"Average demand per item: {avg_demand:.1f} units - optimize inventory accordingly"
-        },
-        {
-            "icon": "🔗",
-            "title": "Live Database Integration",
-            "insight": "Real-time data connection to Railway-hosted PostgreSQL database established",
-            "action": "Monitor data quality and ensure regular updates for accurate analytics"
-        },
-        {
             "icon": "🎯",
-            "title": "Performance Optimization",
-            "insight": "Backend API responding successfully with structured restaurant data",
-            "action": "Leverage live data for real-time business decisions and inventory management"
+            "title": "Inventory Optimization",
+            "description": f"Focus inventory on {top_dish} which shows highest demand patterns. Consider increasing stock levels during peak periods."
         },
         {
-            "icon": "💡",
-            "title": "Scalability Ready",
-            "insight": "System configured for production-grade analytics with automated data processing",
-            "action": "Scale data collection and add more outlets for comprehensive analysis"
+            "icon": "🏢",
+            "title": "Outlet Performance",
+            "description": f"{top_outlet} is your top-performing location. Analyze their operations to replicate success at other outlets."
+        },
+        {
+            "icon": "📊",
+            "title": "Demand Patterns",
+            "description": "Demand shows clear patterns. Consider dynamic pricing and promotional strategies during low-demand periods."
+        },
+        {
+            "icon": "⚡",
+            "title": "Staff Optimization",
+            "description": "Align staffing levels with predicted demand patterns to optimize operational efficiency and customer service."
         }
     ]
     
+    st.markdown("""
+    <div class="recommendations-section">
+    """, unsafe_allow_html=True)
+    
     for rec in recommendations:
         st.markdown(f"""
-        <div class="insight-card">
+        <div class="recommendation-item">
             <h4>{rec['icon']} {rec['title']}</h4>
-            <p><strong>Insight:</strong> {rec['insight']}</p>
-            <p><strong>Recommended Action:</strong> {rec['action']}</p>
+            <p>{rec['description']}</p>
         </div>
         """, unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
 
 def main():
-    """Main heatmap analytics interface with backend-only integration"""
+    """Main heatmap analytics interface with enhanced design"""
+    
+    # Check authentication
+    if not check_authentication():
+        st.error("🔒 **Access Denied**: Please log in from the Home page to access Heatmap Analytics.")
+        if st.button("🏠 Go to Home Page", type="primary"):
+            st.switch_page("Home.py")
+        return
     
     # Header
     st.markdown("""
     <div class="main-header">
-        <h1 style="margin: 0; font-size: 2.5rem;">🔥 Live Heatmap Analytics</h1>
-        <p style="margin: 0.5rem 0 0 0; font-size: 1.2rem; opacity: 0.9;">Real-time Backend Data Visualization & Performance Analysis</p>
+        <h1 class="main-title">🔥 Interactive Heatmap Analytics</h1>
+        <p class="main-subtitle">Real-time Performance Visualization & AI-Powered Business Insights</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Back button and backend status
-    col1, col2 = st.columns([1, 3])
+    # Enhanced navigation bar
+    col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
+    
     with col1:
-        if st.button("🏠 Back to Home"):
+        if st.button("🏠 Home", use_container_width=True):
             st.switch_page("Home.py")
     
     with col2:
+        if st.button("🔮 AI Forecasting", use_container_width=True):
+            st.switch_page("pages/Forecasting_Tool.py")
+    
+    with col3:
+        if st.button("⚙️ Settings", use_container_width=True):
+            st.switch_page("pages/Settings.py")
+    
+    with col4:
         show_backend_status()
     
     st.markdown("---")
@@ -373,14 +575,26 @@ def main():
         st.error("❌ **No data available for heatmap analysis**")
         st.info("""
         **To use the heatmap analytics:**
-        1. Go back to the Home page
-        2. Click 'Seed Database' to populate with sample data
-        3. Return here to generate heatmaps and analytics
+        1. Go to Settings and click 'Seed Database' to populate with sample data
+        2. Return here to generate interactive heatmaps and performance analytics
+        3. Explore AI-powered insights and recommendations
         """)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("⚙️ Go to Settings", type="primary", use_container_width=True):
+                st.switch_page("pages/Settings.py")
+        with col2:
+            if st.button("🏠 Back to Home", use_container_width=True):
+                st.switch_page("Home.py")
         return
     
-    # Filter controls
-    st.markdown("### 🎛️ Analysis Controls (Live Backend Data)")
+    # Enhanced control panel
+    st.markdown("""
+    <div class="control-panel">
+        <h3>🎛️ Analysis Controls</h3>
+    </div>
+    """, unsafe_allow_html=True)
     
     filter_col1, filter_col2, filter_col3 = st.columns(3)
     
@@ -393,7 +607,8 @@ def main():
                 "📅 Date Range",
                 value=(min_date, max_date),
                 min_value=min_date,
-                max_value=max_date
+                max_value=max_date,
+                help="Select the date range for analysis"
             )
             
             # Filter dataframe by date
@@ -412,7 +627,8 @@ def main():
         selected_metric = st.selectbox(
             "📊 Metric to Analyze",
             available_metrics,
-            format_func=lambda x: x.replace('_', ' ').title()
+            format_func=lambda x: x.replace('_', ' ').title(),
+            help="Choose the metric for heatmap visualization"
         )
     
     with filter_col3:
@@ -420,7 +636,8 @@ def main():
         agg_method = st.selectbox(
             "🔢 Aggregation Method",
             ['mean', 'sum', 'max'],
-            format_func=lambda x: x.title()
+            format_func=lambda x: x.title(),
+            help="Select how to aggregate the data"
         )
     
     st.markdown("---")
@@ -430,7 +647,30 @@ def main():
         st.warning("⚠️ **No data available** for selected filters - please adjust date range or check data")
         return
     
-    st.info(f"📊 **Analyzing {len(df):,} records** from live backend database with {df['dish'].nunique()} dishes across {df['outlet'].nunique()} outlets")
+    # Data overview
+    st.markdown(f"""
+    <div class="stats-highlight">
+        <h3>📊 Live Data Overview</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">{len(df):,}</div>
+                <div class="stat-label">Total Records</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{df['dish'].nunique()}</div>
+                <div class="stat-label">Unique Dishes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{df['outlet'].nunique()}</div>
+                <div class="stat-label">Active Outlets</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{df['predicted_demand'].sum():,.0f}</div>
+                <div class="stat-label">Total Demand</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Main heatmap visualization
     st.markdown("### 🔥 Interactive Demand Heatmap")
@@ -438,119 +678,116 @@ def main():
     heatmap_fig = create_interactive_heatmap(
         df, 
         metric=selected_metric, 
-        title=f"🔥 {selected_metric.replace('_', ' ').title()} Heatmap ({agg_method.title()})"
+        title=f"Demand Heatmap ({agg_method.title()})"
     )
     
     if heatmap_fig:
         st.plotly_chart(heatmap_fig, use_container_width=True)
+    else:
+        st.info("🔥 **Heatmap requires data** - Please check your selections")
     
     st.markdown("---")
     
     # Performance metrics and rankings
-    st.markdown("### 📊 Live Performance Analysis")
+    st.markdown("### 📊 Performance Analysis")
     
     outlet_perf, dish_perf = create_comparison_metrics(df)
     create_performance_dashboard(outlet_perf, dish_perf)
     
     st.markdown("---")
     
-    # Trend analysis
-    st.markdown("### 📈 Backend Data Analysis")
-    
+    # Enhanced analytics section
     col1, col2 = st.columns(2)
     
     with col1:
+        st.markdown("### 📈 Trend Analysis")
         trend_fig = create_trend_analysis(df)
         if trend_fig:
             st.plotly_chart(trend_fig, use_container_width=True)
+        else:
+            st.info("📈 **Trend analysis requires date data**")
     
     with col2:
-        # Summary statistics from backend
-        st.markdown("#### 📊 Live Data Statistics")
+        st.markdown("### 🎯 Key Insights")
         
         if not df.empty:
             total_demand = df['predicted_demand'].sum()
             avg_demand = df['predicted_demand'].mean()
             peak_demand = df['predicted_demand'].max()
-            unique_dishes = df['dish'].nunique() if 'dish' in df.columns else 0
-            unique_outlets = df['outlet'].nunique() if 'outlet' in df.columns else 0
-            date_range = df['date'].max() - df['date'].min() if 'date' in df.columns else timedelta(days=0)
+            date_span = df['date'].max() - df['date'].min() if 'date' in df.columns else timedelta(days=0)
             
-            st.markdown(f"""
-            <div class="metric-highlight">
-                <h3>📊 Backend Data Overview</h3>
-                <p><strong>Total Records:</strong> {len(df):,}</p>
-                <p><strong>Total Demand:</strong> {total_demand:,.0f} units</p>
-                <p><strong>Average Daily:</strong> {avg_demand:.1f} units</p>
-                <p><strong>Peak Demand:</strong> {peak_demand:,.0f} units</p>
-                <p><strong>Active Dishes:</strong> {unique_dishes}</p>
-                <p><strong>Outlet Coverage:</strong> {unique_outlets} locations</p>
-                <p><strong>Date Range:</strong> {date_range.days} days</p>
-            </div>
-            """, unsafe_allow_html=True)
+            # Enhanced insights cards
+            insights = [
+                {
+                    "icon": "📊",
+                    "title": "Total Demand Volume",
+                    "value": f"{total_demand:,.0f} units",
+                    "description": "Across all outlets and dishes"
+                },
+                {
+                    "icon": "📅",
+                    "title": "Average Daily Demand",
+                    "value": f"{avg_demand:.1f} units",
+                    "description": "Per dish per day average"
+                },
+                {
+                    "icon": "🔥",
+                    "title": "Peak Single Demand",
+                    "value": f"{peak_demand:,.0f} units",
+                    "description": "Highest recorded demand"
+                },
+                {
+                    "icon": "📈",
+                    "title": "Analysis Period",
+                    "value": f"{date_span.days} days",
+                    "description": "Data coverage span"
+                }
+            ]
+            
+            for insight in insights:
+                st.markdown(f"""
+                <div class="insight-card">
+                    <h4>{insight['icon']} {insight['title']}</h4>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #FF6B35; margin-bottom: 0.5rem;">{insight['value']}</div>
+                    <p>{insight['description']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("🎯 **Insights will appear when data is available**")
     
     st.markdown("---")
     
-    # AI-powered insights
+    # AI-powered recommendations
     create_ai_recommendations(df)
     
-    # Backend data details
-    st.markdown("---")
-    st.markdown("### 🌐 Backend Integration Details")
+    # Action buttons
+    st.markdown("### ⚡ Quick Actions")
     
-    col1, col2 = st.columns(2)
+    action_col1, action_col2, action_col3 = st.columns(3)
     
-    with col1:
-        client = get_api_client()
-        st.markdown(f"""
-        **🔗 Live Backend Connection:**
-        - **API URL**: {client.base_url}
-        - **Status**: ✅ Connected
-        - **Authentication**: {'✅ Authenticated' if check_authentication() else '⚠️ Anonymous'}
-        - **Data Source**: PostgreSQL Database
-        - **Records Loaded**: {len(df):,}
-        """)
-    
-    with col2:
-        st.markdown("""
-        **📊 Data Structure:**
-        - ✅ Outlet information
-        - ✅ Dish catalog
-        - ✅ Demand predictions
-        - ✅ Date/time stamps
-        - ✅ Performance metrics
-        - ✅ Real-time updates
-        """)
-    
-    # Export and action buttons
-    st.markdown("---")
-    st.markdown("### 📥 Export & Actions")
-    
-    export_col1, export_col2, export_col3 = st.columns(3)
-    
-    with export_col1:
-        if st.button("📊 Export Backend Data", use_container_width=True):
+    with action_col1:
+        if st.button("📊 Export Heatmap Data", use_container_width=True):
             if not df.empty:
                 csv_data = df.to_csv(index=False)
                 st.download_button(
                     label="⬇️ Download CSV",
                     data=csv_data,
-                    file_name=f"KKCG_Backend_Heatmap_{datetime.now().strftime('%Y%m%d')}.csv",
+                    file_name=f"KKCG_Heatmap_Data_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv",
                     use_container_width=True
                 )
             else:
                 st.warning("⚠️ No data to export")
     
-    with export_col2:
-        if st.button("📈 Generate Report", use_container_width=True):
+    with action_col2:
+        if st.button("📈 Generate Analytics Report", use_container_width=True):
             if not df.empty:
-                st.success("📄 Backend analytics report generated!")
+                st.success("📄 Analytics report generated successfully!")
             else:
                 st.warning("⚠️ No data for report generation")
     
-    with export_col3:
-        if st.button("🔄 Refresh Analysis", use_container_width=True):
+    with action_col3:
+        if st.button("🔄 Refresh Data", use_container_width=True):
             st.cache_data.clear()
             st.success("✅ Refreshing from backend...")
             st.rerun()
@@ -558,9 +795,10 @@ def main():
     # Footer
     st.markdown("---")
     st.markdown("""
-    <div style="text-align: center; padding: 1rem 0; color: #7F8C8D;">
-        <p>🔥 <strong>Live Backend Heatmap Analytics</strong></p>
-        <p>Real-time visualization with Railway-hosted PostgreSQL and interactive performance analysis</p>
+    <div style="text-align: center; padding: 2rem 0; color: #666;">
+        <h4 style="color: #FF6B35; margin-bottom: 1rem;">🔥 Interactive Heatmap Analytics Engine</h4>
+        <p style="margin: 0;">Real-time performance visualization with AI-powered business insights</p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">Powered by KKCG Analytics Platform • Live Backend Integration • Advanced Analytics</p>
     </div>
     """, unsafe_allow_html=True)
 

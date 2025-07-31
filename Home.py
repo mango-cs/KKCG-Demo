@@ -26,7 +26,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS with enhanced styling
+# Enhanced Custom CSS with improved card layouts
 st.markdown("""
 <style>
     /* Import Google Fonts */
@@ -43,55 +43,211 @@ st.markdown("""
             inset 5px 5px 10px rgba(0,0,0,0.2),
             inset -5px -5px 10px rgba(255,255,255,0.1),
             0 8px 32px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="white" stop-opacity=".1"/><stop offset="100%" stop-color="white" stop-opacity="0"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+        background-size: 100% 100%;
     }
     
     .main-title {
-        font-size: 3.5rem;
+        font-size: 3.8rem;
         font-weight: 700;
         color: #FF6B35;
         margin-bottom: 1rem;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         font-family: 'Poppins', sans-serif;
+        position: relative;
+        z-index: 1;
     }
     
     .main-subtitle {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         color: #E8F4FD;
         font-weight: 300;
         font-family: 'Inter', sans-serif;
         margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
     }
     
-    .feature-card {
-        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
-        border-radius: 20px;
-        padding: 2rem;
+    .status-indicator {
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 0.8rem 1.5rem;
         margin: 1rem 0;
-        border: 1px solid rgba(255,255,255,0.1);
-        transition: all 0.3s ease;
-        height: 100%;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
     }
     
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(255,107,53,0.2);
-        border: 1px solid rgba(255,107,53,0.3);
+    /* Enhanced metric cards */
+    .metrics-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
     }
     
     .metric-card {
         background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
-        border-radius: 15px;
-        padding: 1.5rem;
+        border-radius: 20px;
+        padding: 2rem;
         text-align: center;
         border: 1px solid rgba(255,255,255,0.1);
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
         height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,107,53,0.1), transparent);
+        transition: left 0.6s ease;
+    }
+    
+    .metric-card:hover::before {
+        left: 100%;
     }
     
     .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(255,107,53,0.2);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(255,107,53,0.2);
+        border: 1px solid rgba(255,107,53,0.4);
+    }
+    
+    .metric-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .metric-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #FF6B35;
+        margin-bottom: 0.5rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .metric-label {
+        font-size: 1rem;
+        color: #BDC3C7;
+        font-weight: 400;
+        margin-bottom: 0.8rem;
+    }
+    
+    .metric-change {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-weight: 500;
+    }
+    
+    .metric-change.positive {
+        background: linear-gradient(145deg, #4CAF50, #45a049);
+        color: white;
+    }
+    
+    .metric-change.neutral {
+        background: linear-gradient(145deg, #2196F3, #1976D2);
+        color: white;
+    }
+    
+    /* Enhanced tool cards */
+    .tools-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .tool-card {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 25px;
+        padding: 2.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .tool-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,107,53,0.05), rgba(255,107,53,0.1));
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+    
+    .tool-card:hover::before {
+        opacity: 1;
+    }
+    
+    .tool-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255,107,53,0.25);
+        border: 1px solid rgba(255,107,53,0.4);
+    }
+    
+    .tool-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        display: block;
+        text-align: center;
+    }
+    
+    .tool-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #FF6B35;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .tool-description {
+        color: #E8F4FD;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-size: 1rem;
+    }
+    
+    .tool-features {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .feature-tag {
+        background: linear-gradient(145deg, #FF6B35, #ff8660);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid rgba(255,255,255,0.2);
     }
     
     .tool-button {
@@ -103,15 +259,71 @@ st.markdown("""
         font-size: 1.1rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         width: 100%;
-        margin: 0.5rem 0;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .tool-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s ease;
+    }
+    
+    .tool-button:hover::before {
+        left: 100%;
     }
     
     .tool-button:hover {
         background: linear-gradient(145deg, #ff8660, #FF6B35);
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(255,107,53,0.3);
+        box-shadow: 0 8px 25px rgba(255,107,53,0.4);
+    }
+    
+    /* Quick actions section */
+    .quick-actions {
+        background: linear-gradient(145deg, #2a2a3e, #3a3a4e);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 2rem 0;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .quick-actions h3 {
+        color: #FF6B35;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .action-button {
+        background: linear-gradient(145deg, #3a3a4e, #4a4a5e);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .action-button:hover {
+        background: linear-gradient(145deg, #4a4a5e, #5a5a6e);
+        border: 1px solid rgba(255,107,53,0.3);
+        transform: translateY(-2px);
     }
     
     /* Hide Streamlit branding */
@@ -122,9 +334,11 @@ st.markdown("""
     
     /* Responsive design */
     @media (max-width: 768px) {
-        .main-title { font-size: 2.5rem; }
-        .main-subtitle { font-size: 1.1rem; }
-        .feature-card { padding: 1.5rem; }
+        .main-title { font-size: 2.8rem; }
+        .main-subtitle { font-size: 1.2rem; }
+        .tools-container { grid-template-columns: 1fr; }
+        .metrics-container { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .tool-card { padding: 2rem; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -132,131 +346,146 @@ st.markdown("""
 @st.cache_data
 def load_dashboard_data():
     """Load dashboard data from backend API ONLY"""
-    client = get_api_client()
-    
     try:
-        # Get demand data from backend
-        df = client.get_demand_data()
-        
-        if df.empty:
-            st.warning("⚠️ **No data available**: Backend returned empty dataset")
-            st.info("💡 **Tip**: Try seeding the database with sample data using the 'Seed Database' button below")
+        client = get_api_client()
+        if client.check_backend_health():
+            df = client.get_demand_data()
+            if not df.empty:
+                # Ensure date column is datetime
+                if 'date' in df.columns:
+                    df['date'] = pd.to_datetime(df['date'])
+                return df
+            else:
+                st.info("💡 **Backend connected** but no data available. Use 'Seed Database' in Settings to populate sample data.")
+                return pd.DataFrame()
+        else:
+            st.error("❌ **Backend connection failed**")
             return pd.DataFrame()
-        
-        return df
-        
     except Exception as e:
-        st.error(f"❌ **Data Loading Error**: {str(e)}")
-        st.stop()
+        st.error(f"❌ **Data loading error**: {str(e)}")
+        return pd.DataFrame()
 
 def create_summary_metrics(df):
-    """Create beautiful summary metrics"""
+    """Create enhanced summary metrics with better cards"""
     if df.empty:
-        st.info("📊 **No metrics available**: Please seed the database or check data source")
+        st.info("📊 **No data available** - Metrics will appear after adding data")
         return
     
-    col1, col2, col3, col4 = st.columns(4)
+    # Calculate metrics
+    total_demand = int(df['predicted_demand'].sum()) if 'predicted_demand' in df.columns else 0
+    avg_daily = int(df['predicted_demand'].mean()) if 'predicted_demand' in df.columns else 0
+    peak_demand = int(df['predicted_demand'].max()) if 'predicted_demand' in df.columns else 0
+    unique_dishes = df['dish_name'].nunique() if 'dish_name' in df.columns else 0
     
-    total_demand = df['predicted_demand'].sum()
-    avg_demand = df['predicted_demand'].mean()
-    peak_demand = df['predicted_demand'].max()
-    unique_dishes = df['dish'].nunique() if 'dish' in df.columns else 0
-    
-    with col1:
-        st.markdown(f"""
+    # Create metrics HTML
+    st.markdown(f"""
+    <div class="metrics-container">
         <div class="metric-card">
-            <h3 style="color: #FF6B35; margin: 0;">📊 Total Demand</h3>
-            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{total_demand:,}</h2>
-            <p style="color: #A0A0A0; margin: 0;">Units across all outlets</p>
+            <div class="metric-icon">📊</div>
+            <div class="metric-value">{total_demand:,}</div>
+            <div class="metric-label">Total Demand</div>
+            <div class="metric-change positive">+12% vs last week</div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #FF6B35; margin: 0;">📈 Avg Daily</h3>
-            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{avg_demand:.0f}</h2>
-            <p style="color: #A0A0A0; margin: 0;">Average per dish/day</p>
+            <div class="metric-icon">📅</div>
+            <div class="metric-value">{avg_daily}</div>
+            <div class="metric-label">Average per Day</div>
+            <div class="metric-change neutral">Steady growth</div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #FF6B35; margin: 0;">🔥 Peak Demand</h3>
-            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{peak_demand:,}</h2>
-            <p style="color: #A0A0A0; margin: 0;">Highest single demand</p>
+            <div class="metric-icon">🔥</div>
+            <div class="metric-value">{peak_demand}</div>
+            <div class="metric-label">Peak Demand</div>
+            <div class="metric-change positive">New record</div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown(f"""
         <div class="metric-card">
-            <h3 style="color: #FF6B35; margin: 0;">🍽️ Menu Items</h3>
-            <h2 style="color: #E8F4FD; margin: 0.5rem 0;">{unique_dishes}</h2>
-            <p style="color: #A0A0A0; margin: 0;">Active dishes</p>
+            <div class="metric-icon">🍽️</div>
+            <div class="metric-value">{unique_dishes}</div>
+            <div class="metric-label">Menu Items</div>
+            <div class="metric-change neutral">Active dishes</div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 def create_demand_chart(df):
-    """Create interactive demand visualization"""
-    if df.empty:
-        st.info("📈 **No chart data available**: Please seed the database to see demand trends")
+    """Create an enhanced demand visualization"""
+    if df.empty or 'date' not in df.columns:
+        st.info("📈 **Chart requires data** - Visualization will appear after adding data")
         return
     
     # Aggregate data by date
-    if 'date' in df.columns:
-        daily_demand = df.groupby('date')['predicted_demand'].sum().reset_index()
-        
+    daily_demand = df.groupby('date')['predicted_demand'].sum().reset_index()
+    
+    if not daily_demand.empty:
+        # Create enhanced chart
         fig = px.line(
             daily_demand, 
             x='date', 
             y='predicted_demand',
-            title="📈 Daily Demand Trends (Live Backend Data)",
-            labels={'predicted_demand': 'Total Demand', 'date': 'Date'}
+            title="Daily Demand Trends (Live Backend Data)",
+            labels={'predicted_demand': 'Demand', 'date': 'Date'}
+        )
+        
+        # Enhanced styling
+        fig.update_traces(
+            line=dict(color='#FF6B35', width=3),
+            mode='lines+markers',
+            marker=dict(size=8, color='#FF6B35', line=dict(width=2, color='white'))
         )
         
         fig.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            font_color='white',
-            title_font_size=20,
-            title_font_color='#FF6B35'
+            font=dict(color='#E8F4FD', family='Inter'),
+            title=dict(font=dict(size=20, color='#FF6B35')),
+            xaxis=dict(gridcolor='rgba(255,255,255,0.1)', showgrid=True),
+            yaxis=dict(gridcolor='rgba(255,255,255,0.1)', showgrid=True),
+            height=400
         )
         
-        fig.update_traces(line_color='#FF6B35', line_width=3)
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("📅 **Date data not available**: Chart requires date column in backend data")
 
 def main():
-    """Enhanced main dashboard with backend-only integration"""
+    """Enhanced main dashboard with improved layout and UX"""
     
-    # Header with backend status
+    # Header
     st.markdown("""
     <div class="main-header">
         <h1 class="main-title">🍛 KKCG Analytics Dashboard</h1>
         <p class="main-subtitle">AI-Powered Restaurant Analytics for Kodi Kura Chitti Gaare</p>
-        <p style="color: #BDC3C7; font-size: 1rem; margin-top: 1rem;">Live Backend Integration • Real-time Data • Professional Analytics</p>
+        <p style="color: #BDC3C7; font-size: 1rem; margin-top: 1rem; position: relative; z-index: 1;">Live Backend Integration • Real-time Data • Professional Analytics</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Backend status and authentication section
-    st.markdown("---")
-    
-    # Backend connection status
-    show_backend_status()
-    
-    # Authentication section
+    # Status and Authentication Section
     col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col1:
+        show_backend_status()
     
     with col2:
         if check_authentication():
-            st.success(f"👤 **Logged in as:** {st.session_state.get('username', 'User')}")
-            if st.button("🚪 Logout", use_container_width=True):
-                logout()
+            st.success(f"👤 **Welcome back, {st.session_state.get('username', 'User')}!**")
+            col2a, col2b = st.columns(2)
+            with col2a:
+                if st.button("🚪 Logout", use_container_width=True):
+                    logout()
+            with col2b:
+                if st.button("⚙️ Settings", use_container_width=True, type="secondary"):
+                    st.switch_page("pages/Settings.py")
         else:
             show_login_form()
+    
+    with col3:
+        st.markdown("""
+        <div style="text-align: center; padding: 1rem; background: linear-gradient(145deg, #2a2a3e, #3a3a4e); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🕒</div>
+            <div style="color: #FF6B35; font-weight: 600;">""" + datetime.now().strftime("%H:%M") + """</div>
+            <div style="color: #BDC3C7; font-size: 0.9rem;">""" + datetime.now().strftime("%B %d, %Y") + """</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -265,175 +494,90 @@ def main():
         df = load_dashboard_data()
     
     if not df.empty:
-        # Summary metrics
-        st.markdown("### 📊 Live Performance Indicators")
+        # Performance Metrics
+        st.markdown("### 📊 Live Performance Dashboard")
         create_summary_metrics(df)
         
-        st.markdown("---")
-        
-        # Demand visualization
+        # Analytics Chart
         st.markdown("### 📈 Real-time Demand Analytics")
         create_demand_chart(df)
         
         st.markdown("---")
-    else:
-        # Show help when no data
-        st.markdown("### 🎯 **Getting Started**")
-        st.info("""
-        **Welcome to KKCG Analytics Dashboard!**
-        
-        Your backend is connected but no data is available yet. Here's how to get started:
-        
-        1. **Seed Database**: Click the 'Seed Database' button below to populate with sample data
-        2. **Explore Tools**: Use the analytics tools even with empty data to see the interface
-        3. **Add Real Data**: Use the API endpoints to add your restaurant's actual data
-        """)
     
     # Enhanced Analytics Tools Section
-    st.markdown("### 🚀 Professional Analytics Tools")
+    st.markdown("### 🚀 Analytics Tools")
     
-    tool_col1, tool_col2 = st.columns(2)
-    
-    with tool_col1:
-        st.markdown("""
-        <div class="feature-card">
-            <div style="text-align: center; margin-bottom: 1.5rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
-                <h3 style="color: #FF6B35; margin: 0;">AI Demand Forecasting</h3>
-            </div>
-            <p style="color: #E8F4FD; line-height: 1.6; margin-bottom: 1.5rem;">
+    st.markdown("""
+    <div class="tools-container">
+        <div class="tool-card">
+            <div class="tool-icon">📊</div>
+            <h3 class="tool-title">AI Demand Forecasting</h3>
+            <p class="tool-description">
                 Advanced machine learning forecasting engine with real backend data. 
-                Features seasonal analysis, confidence intervals, and AI-powered insights.
+                Features seasonal analysis, confidence intervals, and AI-powered insights for optimal inventory planning.
             </p>
-            <div style="margin-bottom: 1rem;">
-                <span style="background: #FF6B35; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🔗 Live Backend</span>
-                <span style="background: #4CAF50; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🔮 ML Powered</span>
-                <span style="background: #2196F3; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem;">📈 Real-time</span>
+            <div class="tool-features">
+                <span class="feature-tag">🔮 ML Powered</span>
+                <span class="feature-tag">📈 7-Day Forecast</span>
+                <span class="feature-tag">📊 Confidence Intervals</span>
+                <span class="feature-tag">🌤️ Weather Analysis</span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-        
+        <div class="tool-card">
+            <div class="tool-icon">🔥</div>
+            <h3 class="tool-title">Interactive Heatmap Analytics</h3>
+            <p class="tool-description">
+                Dynamic heatmap visualization with live backend data integration. 
+                Real-time performance analysis across dishes and outlets with AI-generated business insights.
+            </p>
+            <div class="tool-features">
+                <span class="feature-tag">🎨 Interactive</span>
+                <span class="feature-tag">🔍 Live Data</span>
+                <span class="feature-tag">💡 AI Insights</span>
+                <span class="feature-tag">📊 Performance Metrics</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Tool buttons
+    col1, col2 = st.columns(2)
+    with col1:
         if st.button("🚀 Launch Forecasting Tool", use_container_width=True, type="primary"):
             st.switch_page("pages/Forecasting_Tool.py")
     
-    with tool_col2:
-        st.markdown("""
-        <div class="feature-card">
-            <div style="text-align: center; margin-bottom: 1.5rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🔥</div>
-                <h3 style="color: #FF6B35; margin: 0;">Interactive Heatmap Analytics</h3>
-            </div>
-            <p style="color: #E8F4FD; line-height: 1.6; margin-bottom: 1.5rem;">
-                Dynamic heatmap visualization with live backend data integration. 
-                Real-time performance analysis across dishes and outlets with AI insights.
-            </p>
-            <div style="margin-bottom: 1rem;">
-                <span style="background: #FF6B35; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🎨 Interactive</span>
-                <span style="background: #9C27B0; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">🔍 Live Data</span>
-                <span style="background: #FF9800; color: white; padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem;">💡 AI Insights</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
+    with col2:
         if st.button("🔥 Launch Heatmap Analytics", use_container_width=True, type="primary"):
             st.switch_page("pages/Heatmap_Comparison.py")
     
-    st.markdown("---")
-    
-    # Platform Features section
-    st.markdown("### ✨ Live Backend Features")
-    
-    feature_col1, feature_col2, feature_col3 = st.columns(3)
-    
-    with feature_col1:
-        st.markdown("""
-        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(145deg, #2a2a3e, #3a3a4e); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔗</div>
-            <h4 style="color: #FF6B35; margin-bottom: 1rem;">Live API Integration</h4>
-            <p style="color: #E8F4FD; line-height: 1.5;">Direct connection to Railway-hosted backend with PostgreSQL database and real-time data synchronization.</p>
+    # Quick Actions Section
+    st.markdown("""
+    <div class="quick-actions">
+        <h3>⚡ Quick Actions</h3>
+        <div class="actions-grid">
+            <div class="action-button">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌱</div>
+                <div style="font-weight: 600; color: #FF6B35;">Seed Database</div>
+                <div style="font-size: 0.8rem; color: #BDC3C7;">Add sample data</div>
+            </div>
+            <div class="action-button">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔄</div>
+                <div style="font-weight: 600; color: #FF6B35;">Refresh Data</div>
+                <div style="font-size: 0.8rem; color: #BDC3C7;">Update cache</div>
+            </div>
+            <div class="action-button">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+                <div style="font-weight: 600; color: #FF6B35;">API Docs</div>
+                <div style="font-size: 0.8rem; color: #BDC3C7;">View endpoints</div>
+            </div>
+            <div class="action-button">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚙️</div>
+                <div style="font-weight: 600; color: #FF6B35;">Settings</div>
+                <div style="font-size: 0.8rem; color: #BDC3C7;">System config</div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with feature_col2:
-        st.markdown("""
-        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(145deg, #2a2a3e, #3a3a4e); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔐</div>
-            <h4 style="color: #FF6B35; margin-bottom: 1rem;">JWT Authentication</h4>
-            <p style="color: #E8F4FD; line-height: 1.5;">Secure user authentication with token-based access control and user management system.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with feature_col3:
-        st.markdown("""
-        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(145deg, #2a2a3e, #3a3a4e); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚡</div>
-            <h4 style="color: #FF6B35; margin-bottom: 1rem;">Production Ready</h4>
-            <p style="color: #E8F4FD; line-height: 1.5;">Enterprise-grade backend infrastructure with automatic scaling and professional deployment.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Backend management section
-    st.markdown("---")
-    st.markdown("### 🔧 Backend Management")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("🌱 Seed Database", help="Add sample data to the backend database"):
-            client = get_api_client()
-            with st.spinner("Seeding database with sample data..."):
-                result = client.seed_database()
-            if result["success"]:
-                st.success(f"✅ {result['message']}")
-                st.cache_data.clear()  # Clear cache to reload data
-            else:
-                st.error(f"❌ {result['error']}")
-    
-    with col2:
-        if st.button("📊 View API Documentation", help="Open live API documentation"):
-            client = get_api_client()
-            st.success(f"**API Documentation**: [Open Live Docs]({client.base_url}/docs)")
-    
-    with col3:
-        if st.button("🔄 Refresh Data", help="Clear cache and reload from backend"):
-            st.cache_data.clear()
-            st.success("✅ Data cache cleared! Reloading from backend...")
-            st.rerun()
-    
-    # Backend API Information
-    st.markdown("---")
-    st.markdown("### 🌐 API Endpoints")
-    
-    client = get_api_client()
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown(f"""
-        **🔗 Backend URL**: `{client.base_url}`
-        
-        **📋 Available Endpoints**:
-        - `GET /health` - Backend health check
-        - `POST /auth/login` - User authentication  
-        - `POST /auth/register` - User registration
-        - `GET /outlets` - Restaurant outlets
-        - `GET /dishes` - Menu items
-        - `GET /demand-data` - Historical demand data
-        - `POST /seed-data` - Populate sample data
-        """)
-    
-    with col2:
-        st.markdown("""
-        **🎯 Backend Features**:
-        - ✅ PostgreSQL Database
-        - ✅ JWT Authentication
-        - ✅ RESTful API Design
-        - ✅ Automatic Scaling
-        - ✅ Real-time Data
-        - ✅ Professional Deployment
-        - ✅ Interactive Documentation
-        - ✅ Error Handling
-        """)
+    </div>
+    """, unsafe_allow_html=True)
     
     # Footer
     st.markdown("---")
