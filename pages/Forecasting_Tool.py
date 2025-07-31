@@ -312,7 +312,7 @@ def load_forecasting_data():
     """Load historical data from backend API"""
     try:
         client = get_api_client()
-        if client.check_backend_health():
+        if client.health_check():
             df = client.get_demand_data()
             if not df.empty:
                 # Ensure required columns exist and are properly formatted

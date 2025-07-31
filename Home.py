@@ -348,7 +348,7 @@ def load_dashboard_data():
     """Load dashboard data from backend API ONLY"""
     try:
         client = get_api_client()
-        if client.check_backend_health():
+        if client.health_check():
             df = client.get_demand_data()
             if not df.empty:
                 # Ensure date column is datetime
@@ -551,33 +551,36 @@ def main():
             st.switch_page("pages/Heatmap_Comparison.py")
     
     # Quick Actions Section
-    st.markdown("""
-    <div class="quick-actions">
-        <h3>⚡ Quick Actions</h3>
-        <div class="actions-grid">
-            <div class="action-button">
-                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🌱</div>
-                <div style="font-weight: 600; color: #FF6B35;">Seed Database</div>
-                <div style="font-size: 0.8rem; color: #BDC3C7;">Add sample data</div>
-            </div>
-            <div class="action-button">
-                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔄</div>
-                <div style="font-weight: 600; color: #FF6B35;">Refresh Data</div>
-                <div style="font-size: 0.8rem; color: #BDC3C7;">Update cache</div>
-            </div>
-            <div class="action-button">
-                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
-                <div style="font-weight: 600; color: #FF6B35;">API Docs</div>
-                <div style="font-size: 0.8rem; color: #BDC3C7;">View endpoints</div>
-            </div>
-            <div class="action-button">
-                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚙️</div>
-                <div style="font-weight: 600; color: #FF6B35;">Settings</div>
-                <div style="font-size: 0.8rem; color: #BDC3C7;">System config</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### ⚡ Quick Actions")
+    
+    action_col1, action_col2, action_col3, action_col4 = st.columns(4)
+    
+    with action_col1:
+        if st.button("🌱 Seed Database", help="Add sample data to the backend database", use_container_width=True):
+            client = get_api_client()
+            with st.spinner("Seeding database with sample data..."):
+                result = client.seed_database()
+            if result["success"]:
+                st.success(f"✅ {result['message']}")
+                st.cache_data.clear()
+                st.rerun()
+            else:
+                st.error(f"❌ {result['error']}")
+    
+    with action_col2:
+        if st.button("🔄 Refresh Data", help="Clear cache and reload from backend", use_container_width=True):
+            st.cache_data.clear()
+            st.success("✅ Data cache cleared! Reloading from backend...")
+            st.rerun()
+    
+    with action_col3:
+        if st.button("📊 API Docs", help="Open live API documentation", use_container_width=True):
+            client = get_api_client()
+            st.success(f"**API Documentation**: [Open Live Docs]({client.base_url}/docs)")
+    
+    with action_col4:
+        if st.button("⚙️ Settings", help="Open system settings and configuration", use_container_width=True):
+            st.switch_page("pages/Settings.py")
     
     # Footer
     st.markdown("---")

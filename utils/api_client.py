@@ -305,6 +305,7 @@ def show_login_form():
                 if result["success"]:
                     st.session_state.access_token = result["data"]["access_token"]
                     st.session_state.username = username
+                    st.session_state.login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     st.success("✅ Login successful!")
                     st.rerun()
                 else:
@@ -318,6 +319,7 @@ def show_login_form():
                 if result["success"]:
                     st.session_state.access_token = result["data"]["access_token"]
                     st.session_state.username = "demo"
+                    st.session_state.login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     st.success("✅ Demo login successful!")
                     st.rerun()
                 else:
@@ -357,5 +359,7 @@ def logout():
         del st.session_state.access_token
     if 'username' in st.session_state:
         del st.session_state.username
+    if 'login_time' in st.session_state:
+        del st.session_state.login_time
     st.success("✅ Logged out successfully")
     st.rerun() 

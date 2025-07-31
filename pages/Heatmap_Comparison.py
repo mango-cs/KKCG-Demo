@@ -332,7 +332,7 @@ def load_heatmap_data():
     """Load data for heatmap analysis from backend API"""
     try:
         client = get_api_client()
-        if client.check_backend_health():
+        if client.health_check():
             df = client.get_demand_data()
             if not df.empty:
                 # Ensure required columns exist and are properly formatted
@@ -440,6 +440,52 @@ def create_comparison_metrics(df):
     dish_performance = dish_performance.reset_index().sort_values('Total_Demand', ascending=False)
     
     return outlet_performance, dish_performance
+
+def create_performance_dashboard(outlet_perf, dish_perf):
+    """Create enhanced performance dashboard"""
+    if outlet_perf.empty and dish_perf.empty:
+        st.info("📊 **Performance metrics require data**")
+        return
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if not outlet_perf.empty:
+            st.markdown("""
+            <div class="performance-card">
+                <h4>🏢 Top Performing Outlets</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            for idx, row in outlet_perf.head(5).iterrows():
+                performance_class = "high-performance" if idx < 2 else "medium-performance" if idx < 4 else "low-performance"
+                rank = idx + 1
+                
+                st.markdown(f"""
+                <div class="performance-item">
+                    <span style="color: #E8F4FD; font-weight: 600;">#{rank}. {row['outlet']}</span>
+                    <span class="performance-indicator {performance_class}">{row['Total_Demand']:,.0f}</span>
+                </div>
+                """, unsafe_allow_html=True)
+    
+    with col2:
+        if not dish_perf.empty:
+            st.markdown("""
+            <div class="performance-card">
+                <h4>🍽️ Top Performing Dishes</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            for idx, row in dish_perf.head(5).iterrows():
+                performance_class = "high-performance" if idx < 2 else "medium-performance" if idx < 4 else "low-performance"
+                rank = idx + 1
+                
+                st.markdown(f"""
+                <div class="performance-item">
+                    <span style="color: #E8F4FD; font-weight: 600;">#{rank}. {row['dish']}</span>
+                    <span class="performance-indicator {performance_class}">{row['Total_Demand']:,.0f}</span>
+                </div>
+                """, unsafe_allow_html=True)
 
 def create_trend_analysis(df):
     """Create enhanced trend analysis visualization"""
