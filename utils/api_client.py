@@ -1,47 +1,46 @@
+# KKCG Analytics API Client
 import requests
 import streamlit as st
+from typing import Dict, List, Optional
+import json
 from datetime import datetime
-from typing import List, Dict, Optional
-import pandas as pd
-import os
 
 class KKCGAPIClient:
-    """API client for KKCG Analytics Backend - Backend Only Mode"""
+    """API client for KKCG Analytics backend"""
     
     def __init__(self, base_url: str = None):
-        # Use Railway backend URL - PRODUCTION ONLY
-        self.base_url = (
-            base_url or 
-            os.getenv("API_BASE_URL") or 
-            "https://kkcgbackend-production.up.railway.app"
-        )
-        self.token = None
-        self.headers = {"Content-Type": "application/json"}
+        # Use deployed Railway backend by default
+        self.base_url = base_url or "https://web-production-929f.up.railway.app"
         
-        # Test connection on startup
+        # Ensure base_url doesn't end with slash
+        if self.base_url.endswith('/'):
+            self.base_url = self.base_url[:-1]
+            
+        self.session = requests.Session()
+        self.session.timeout = 30  # 30 second timeout
+        
+        # Test backend connection on initialization
         self._validate_backend()
     
     def _validate_backend(self):
-        """Validate backend is accessible - REQUIRED"""
+        """Validate that backend is accessible"""
         try:
-            response = requests.get(f"{self.base_url}/health", timeout=10)
-            if response.status_code != 200:
-                st.error(f"❌ Backend Error: Server returned {response.status_code}")
-                st.stop()
-        except requests.exceptions.ConnectionError:
-            st.error(f"❌ **Backend Connection Failed**")
-            st.error(f"Cannot connect to: `{self.base_url}`")
-            st.error("**Solution**: Ensure backend is running on Railway")
-            st.info("🔗 Check backend status: https://kkcgbackend-production.up.railway.app/docs")
-            st.stop()
+            response = self.session.get(f"{self.base_url}/health", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("status") == "healthy":
+                    st.session_state.backend_status = "✅ Connected"
+                    st.session_state.backend_url = self.base_url
+                    return True
         except Exception as e:
-            st.error(f"❌ **Backend Error**: {str(e)}")
-            st.stop()
+            st.session_state.backend_status = f"❌ Connection failed: {str(e)}"
+            st.session_state.backend_url = self.base_url
+        return False
     
     def get_connection_status(self):
         """Get backend connection status"""
         try:
-            response = requests.get(f"{self.base_url}/health", timeout=5)
+            response = self.session.get(f"{self.base_url}/health", timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 db_status = data.get('database', 'unknown')
@@ -63,18 +62,17 @@ class KKCGAPIClient:
                 st.stop()
         except Exception as e:
             st.error(f"❌ **Backend Connection Lost**: {str(e)}")
-            st.error("🔗 Check: https://kkcgbackend-production.up.railway.app/health")
+            st.error(f"🔗 Check: {self.base_url}/health")
             st.stop()
     
     def set_token(self, token: str):
         """Set authentication token"""
-        self.token = token
-        self.headers["Authorization"] = f"Bearer {token}"
+        self.session.headers.update({"Authorization": f"Bearer {token}"})
     
     def login(self, username: str, password: str) -> Dict:
         """Login to get access token"""
         try:
-            response = requests.post(
+            response = self.session.post(
                 f"{self.base_url}/auth/login",
                 json={"username": username, "password": password},
                 timeout=30
@@ -98,7 +96,7 @@ class KKCGAPIClient:
     def register(self, username: str, email: str, password: str) -> Dict:
         """Register new user"""
         try:
-            response = requests.post(
+            response = self.session.post(
                 f"{self.base_url}/auth/register",
                 json={"username": username, "email": email, "password": password},
                 timeout=30
@@ -120,7 +118,7 @@ class KKCGAPIClient:
     def get_outlets(self) -> List[Dict]:
         """Get all outlets - BACKEND REQUIRED"""
         try:
-            response = requests.get(f"{self.base_url}/outlets", headers=self.headers, timeout=30)
+            response = self.session.get(f"{self.base_url}/outlets", timeout=30)
             
             if response.status_code == 200:
                 return response.json()
@@ -138,7 +136,7 @@ class KKCGAPIClient:
     def get_dishes(self) -> List[Dict]:
         """Get all dishes - BACKEND REQUIRED"""
         try:
-            response = requests.get(f"{self.base_url}/dishes", headers=self.headers, timeout=30)
+            response = self.session.get(f"{self.base_url}/dishes", timeout=30)
             
             if response.status_code == 200:
                 return response.json()
@@ -170,9 +168,8 @@ class KKCGAPIClient:
             if dish_id:
                 params["dish_id"] = dish_id
             
-            response = requests.get(
+            response = self.session.get(
                 f"{self.base_url}/demand-data",
-                headers=self.headers,
                 params=params,
                 timeout=30
             )
@@ -205,7 +202,7 @@ class KKCGAPIClient:
     def get_analytics_summary(self) -> Dict:
         """Get analytics summary - BACKEND REQUIRED"""
         try:
-            response = requests.get(f"{self.base_url}/analytics/summary", headers=self.headers, timeout=30)
+            response = self.session.get(f"{self.base_url}/analytics/summary", timeout=30)
             
             if response.status_code == 200:
                 return response.json()
@@ -223,7 +220,7 @@ class KKCGAPIClient:
     def seed_database(self) -> Dict:
         """Seed database with sample data"""
         try:
-            response = requests.post(f"{self.base_url}/seed-data", headers=self.headers, timeout=60)
+            response = self.session.post(f"{self.base_url}/seed-data", timeout=60)
             
             if response.status_code == 200:
                 return {"success": True, "message": response.json()["message"]}
@@ -239,7 +236,7 @@ class KKCGAPIClient:
     def health_check(self) -> bool:
         """Check if backend is accessible"""
         try:
-            response = requests.get(f"{self.base_url}/health", timeout=10)
+            response = self.session.get(f"{self.base_url}/health", timeout=10)
             return response.status_code == 200
         except:
             return False
